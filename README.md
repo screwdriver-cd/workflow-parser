@@ -9,6 +9,26 @@
 npm install screwdriver-workflow-parser
 ```
 
+```
+const { getWorkflow, getNextJobs } = require('screwdriver-workflow-parser');
+
+// Calculate the directed graph workflow from a pipeline config (and parse legacy workflows)
+const workflowGraph = getWorkflow(pipelineConfig, { useLegacy: true });
+
+/* 
+{ 
+    nodes: [{ name: '~pr'}, { name: '~commit'}, { name: 'main' }], 
+    edges: [{ src: '~pr', dest: 'main'}, { src: '~commit', dest: 'main'}] 
+}
+*/
+
+// Get a list of job names to start as a result of a commit event, e.g. [ 'a', 'b' ]
+const commitJobsToTrigger = getNextJobs(workflowGraph, { trigger: '~commit' });
+
+// Get a list of job names to start as a result of a pull-request event, e.g. [ 'PR-123:a' ]
+const prJobsToTrigger = getNextJobs(workflowGraph, { trigger: '~pr', prNum: 123 }); 
+```
+
 ## Testing
 
 ```bash
@@ -25,7 +45,7 @@ Code licensed under the BSD 3-Clause license. See LICENSE file for terms.
 [license-image]: https://img.shields.io/npm/l/screwdriver-workflow-parser.svg
 [issues-image]: https://img.shields.io/github/issues/screwdriver-cd/workflow-parser.svg
 [issues-url]: https://github.com/screwdriver-cd/workflow-parser/issues
-[status-image]: https://cd.screwdriver.cd/pipelines/pipelineid/badge
-[status-url]: https://cd.screwdriver.cd/pipelines/pipelineid
+[status-image]: https://cd.screwdriver.cd/pipelines/352/badge
+[status-url]: https://cd.screwdriver.cd/pipelines/352
 [daviddm-image]: https://david-dm.org/screwdriver-cd/workflow-parser.svg?theme=shields.io
 [daviddm-url]: https://david-dm.org/screwdriver-cd/workflow-parser
