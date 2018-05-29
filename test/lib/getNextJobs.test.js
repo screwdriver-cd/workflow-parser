@@ -46,5 +46,21 @@ describe('getNextJobs', () => {
             ['b', 'c', 'd']);
         // trigger one after job "b"
         assert.deepEqual(getNextJobs(parallelWorkflow, { trigger: 'b' }), ['e']);
+
+        const specificBranchWorkflow = {
+            edges: [
+                { src: '~commit', dest: 'a' },
+                { src: '~commit:foo', dest: 'b' },
+                { src: '~commit:dev-.*', dest: 'c' }
+            ]
+        };
+
+        // trigger own pipeline commit
+        assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~commit' }), ['a']);
+        // trigger "foo" branch commit
+        assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~commit:foo' }), ['b']);
+        // trigger "dev-bar" branch commit
+        assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~commit:dev-bar' }),
+            ['c']);
     });
 });
