@@ -51,7 +51,8 @@ describe('getNextJobs', () => {
             edges: [
                 { src: '~commit', dest: 'a' },
                 { src: '~commit:foo', dest: 'b' },
-                { src: '~commit:dev-.*', dest: 'c' }
+                { src: '~commit:/foo-/', dest: 'c' },
+                { src: '~commit:/^bar-.*$/', dest: 'd' }
             ]
         };
 
@@ -59,8 +60,11 @@ describe('getNextJobs', () => {
         assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~commit' }), ['a']);
         // trigger "foo" branch commit
         assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~commit:foo' }), ['b']);
-        // trigger "dev-bar" branch commit
-        assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~commit:dev-bar' }),
+        // trigger "foo-bar-dev" branch commit
+        assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~commit:foo-bar-dev' }),
             ['c']);
+        // trigger "bar-foo-prod" branch commit
+        assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~commit:bar-foo-prod' }),
+            ['c', 'd']);
     });
 });
