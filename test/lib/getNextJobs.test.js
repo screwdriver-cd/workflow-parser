@@ -52,7 +52,10 @@ describe('getNextJobs', () => {
                 { src: '~commit', dest: 'a' },
                 { src: '~commit:foo', dest: 'b' },
                 { src: '~commit:/foo-/', dest: 'c' },
-                { src: '~commit:/^bar-.*$/', dest: 'd' }
+                { src: '~commit:/^bar-.*$/', dest: 'd' },
+                { src: '~pr:foo', dest: 'e' },
+                { src: '~pr:/foo-/', dest: 'f' },
+                { src: '~pr:/^bar-.*$/', dest: 'g' }
             ]
         };
 
@@ -66,5 +69,14 @@ describe('getNextJobs', () => {
         // trigger "bar-foo-prod" branch commit
         assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~commit:bar-foo-prod' }),
             ['c', 'd']);
+        // trigger by a pull request on "foo" branch
+        assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~pr:foo', prNum: '123' }),
+            ['e']);
+        // trigger by a pull request on "foo-bar-dev" branch
+        assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~pr:foo-bar-dev',
+            prNum: '123' }), ['f']);
+        // trigger by a pull request on "bar-foo-prod" branch
+        assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~pr:bar-foo-prod',
+            prNum: '123' }), ['f', 'g']);
     });
 });
