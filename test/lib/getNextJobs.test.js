@@ -31,6 +31,12 @@ describe('getNextJobs', () => {
         assert.deepEqual(getNextJobs(WORKFLOW, { trigger: 'bar' }), []);
         // trigger after non-existing job "main"
         assert.deepEqual(getNextJobs(WORKFLOW, { trigger: 'banana' }), []);
+        // trigger for a pr event with prChain
+        assert.deepEqual(getNextJobs(WORKFLOW, {
+            trigger: '~pr',
+            prNum: '123',
+            prChain: true
+        }), ['main']);
 
         const parallelWorkflow = {
             edges: [
