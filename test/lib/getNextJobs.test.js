@@ -23,6 +23,10 @@ describe('getNextJobs', () => {
         }), ['PR-123:main']);
         // trigger for commit event
         assert.deepEqual(getNextJobs(WORKFLOW, { trigger: '~commit' }), ['main']);
+        // trigger for release event
+        assert.deepEqual(getNextJobs(WORKFLOW, { trigger: '~release' }), ['baz']);
+        // trigger for tag event
+        assert.deepEqual(getNextJobs(WORKFLOW, { trigger: '~tag' }), ['baz']);
         // trigger after job "main"
         assert.deepEqual(getNextJobs(WORKFLOW, { trigger: 'main' }), ['foo']);
         // trigger after job "foo"
@@ -53,7 +57,9 @@ describe('getNextJobs', () => {
             trigger: 'PR-123:bar',
             prChain: true
         }), []);
+    });
 
+    it('should figure out what jobs start next with parallel workflow', () => {
         const parallelWorkflow = {
             edges: [
                 { src: 'a', dest: 'b' },
@@ -68,7 +74,9 @@ describe('getNextJobs', () => {
             ['b', 'c', 'd']);
         // trigger one after job "b"
         assert.deepEqual(getNextJobs(parallelWorkflow, { trigger: 'b' }), ['e']);
+    });
 
+    it('should figure out what jobs start next with specific branch workflow', () => {
         const specificBranchWorkflow = {
             edges: [
                 { src: '~commit', dest: 'a' },

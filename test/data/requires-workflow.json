@@ -2,6 +2,7 @@
     "jobs": {
         "main": { "requires": ["~pr", "~commit"] },
         "foo": { "requires": ["main"] },
-        "bar": { "requires": ["foo"] }
+        "bar": { "requires": ["foo"] },
+        "baz": { "requires": ["~release", "~tag"] }
     }
 }

@@ -38,7 +38,14 @@ describe('getWorkflow', () => {
         });
 
         assert.deepEqual(result, {
-            nodes: [{ name: '~pr' }, { name: '~commit' }, { name: 'foo' }, { name: 'bar' }],
+            nodes: [
+                { name: '~pr' },
+                { name: '~commit' },
+                { name: '~release' },
+                { name: '~tag' },
+                { name: 'foo' },
+                { name: 'bar' }
+            ],
             edges: [{ src: 'foo', dest: 'bar' }]
         });
     });
@@ -57,6 +64,8 @@ describe('getWorkflow', () => {
             nodes: [
                 { name: '~pr' },
                 { name: '~commit' },
+                { name: '~release' },
+                { name: '~tag' },
                 { name: 'foo' },
                 { name: 'A' },
                 { name: 'B' },
@@ -90,6 +99,8 @@ describe('getWorkflow', () => {
             nodes: [
                 { name: '~pr' },
                 { name: '~commit' },
+                { name: '~release' },
+                { name: '~tag' },
                 { name: 'foo' },
                 { name: 'A' },
                 { name: 'B' },
@@ -121,6 +132,8 @@ describe('getWorkflow', () => {
             nodes: [
                 { name: '~pr' },
                 { name: '~commit' },
+                { name: '~release' },
+                { name: '~tag' },
                 { name: 'foo' },
                 { name: 'A' }
             ],
@@ -144,6 +157,8 @@ describe('getWorkflow', () => {
             nodes: [
                 { name: '~pr' },
                 { name: '~commit' },
+                { name: '~release' },
+                { name: '~tag' },
                 { name: 'foo' },
                 { name: 'bar' },
                 { name: 'baz' },
