@@ -50,7 +50,7 @@ Code licensed under the BSD 3-Clause license. See LICENSE file for terms.
 [license-image]: https://img.shields.io/npm/l/screwdriver-workflow-parser.svg
 [issues-image]: https://img.shields.io/github/issues/screwdriver-cd/workflow-parser.svg
 [issues-url]: https://github.com/screwdriver-cd/workflow-parser/issues
-[status-image]: https://cd.screwdriver.cd/pipelines/352/badge
-[status-url]: https://cd.screwdriver.cd/pipelines/352
+[status-image]: https://cd.screwdriver.cd/pipelines/529/badge
+[status-url]: https://cd.screwdriver.cd/pipelines/529
 [daviddm-image]: https://david-dm.org/screwdriver-cd/workflow-parser.svg?theme=shields.io
 [daviddm-url]: https://david-dm.org/screwdriver-cd/workflow-parser
