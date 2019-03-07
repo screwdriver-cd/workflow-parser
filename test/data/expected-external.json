@@ -2,21 +2,16 @@
     "nodes": [
         { "name": "~pr" },
         { "name": "~commit" },
-        { "name": "~release" },
-        { "name": "~tag" },
         { "name": "main" },
         { "name": "foo" },
         { "name": "bar" },
-        { "name": "~sd@1234:foo" },
-        { "name": "baz" }
+        { "name": "~sd@1234:foo" }
     ],
     "edges": [
         { "src": "~pr", "dest": "main" },
         { "src": "~commit", "dest": "main" },
         { "src": "main", "dest": "foo" },
         { "src": "~sd@1234:foo", "dest": "bar" },
-        { "src": "foo", "dest": "bar" },
-        { "src": "~release", "dest": "baz" },
-        { "src": "~tag", "dest": "baz" }
+        { "src": "foo", "dest": "bar" }
     ]
 }

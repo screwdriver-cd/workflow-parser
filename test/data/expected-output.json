@@ -2,12 +2,12 @@
     "nodes": [
         { "name": "~pr" },
         { "name": "~commit" },
-        { "name": "~release" },
-        { "name": "~tag" },
         { "name": "main" },
         { "name": "foo" },
         { "name": "bar" },
-        { "name": "baz" }
+        { "name": "baz" },
+        { "name": "~release" },
+        { "name": "~tag" }
     ],
     "edges": [
         { "src": "~pr", "dest": "main" },
