@@ -35,27 +35,27 @@ describe('getNextJobs', () => {
         assert.deepEqual(getNextJobs(WORKFLOW, { trigger: 'bar' }), []);
         // trigger after non-existing job "main"
         assert.deepEqual(getNextJobs(WORKFLOW, { trigger: 'banana' }), []);
-        // trigger for a pr event with prChain
+        // trigger for a pr event with chainPR
         assert.deepEqual(getNextJobs(WORKFLOW, {
             trigger: '~pr',
             prNum: '123',
-            prChain: true
+            chainPR: true
         }),
         ['PR-123:main']);
-        // trigger after job "PR-123:main" with prChain
+        // trigger after job "PR-123:main" with chainPR
         assert.deepEqual(getNextJobs(WORKFLOW, {
             trigger: 'PR-123:main',
-            prChain: true
+            chainPR: true
         }), ['PR-123:foo']);
-        // trigger after job "PR-123:foo" with prChain
+        // trigger after job "PR-123:foo" with chainPR
         assert.deepEqual(getNextJobs(WORKFLOW, {
             trigger: 'PR-123:foo',
-            prChain: true
+            chainPR: true
         }), ['PR-123:bar']);
-        // trigger after job "PR-123:var" with prChain
+        // trigger after job "PR-123:var" with chainPR
         assert.deepEqual(getNextJobs(WORKFLOW, {
             trigger: 'PR-123:bar',
-            prChain: true
+            chainPR: true
         }), []);
     });
 
