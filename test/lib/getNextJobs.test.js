@@ -101,12 +101,12 @@ describe('getNextJobs', () => {
             ['c', 'd']);
         // trigger by a pull request on "foo" branch
         assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~pr:foo', prNum: '123' }),
-            ['PR-123:e']);
+            ['e']);
         // trigger by a pull request on "foo-bar-dev" branch
         assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~pr:foo-bar-dev',
-            prNum: '123' }), ['PR-123:f']);
+            prNum: '123' }), ['f']);
         // trigger by a pull request on "bar-foo-prod" branch
         assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~pr:bar-foo-prod',
-            prNum: '123' }), ['PR-123:f', 'PR-123:g']);
+            prNum: '123' }), ['f', 'g']);
     });
 });
