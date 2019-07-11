@@ -40,8 +40,9 @@ describe('isPR', () => {
 });
 
 describe('findJobs', () => {
+    const findJobs = rewireGetSrcForJoin.__get__('findJobs');
+
     it('should find jobs when search job is joined job', () => {
-        const findJobs = rewireGetSrcForJoin.__get__('findJobs');
         const destJobName = 'foo';
 
         assert.deepEqual(findJobs(WORKFLOW, destJobName),
@@ -49,7 +50,6 @@ describe('findJobs', () => {
     });
 
     it('should not find jobs when search job is not joined job', () => {
-        const findJobs = rewireGetSrcForJoin.__get__('findJobs');
         const destJobName = 'bar';
 
         assert.deepEqual(findJobs(WORKFLOW, destJobName), new Set());
@@ -57,8 +57,9 @@ describe('findJobs', () => {
 });
 
 describe('findPRJobs', () => {
+    const findPRJobs = rewireGetSrcForJoin.__get__('findPRJobs');
+
     it('should find jobs when search job is joined job', () => {
-        const findPRJobs = rewireGetSrcForJoin.__get__('findPRJobs');
         const destJobName = 'PR-179:foo';
 
         assert.deepEqual(findPRJobs(WORKFLOW, destJobName),
@@ -66,7 +67,6 @@ describe('findPRJobs', () => {
     });
 
     it('should not find jobs when search job is not joined job', () => {
-        const findPRJobs = rewireGetSrcForJoin.__get__('findPRJobs');
         const destJobName = 'PR-179:bar';
 
         assert.deepEqual(findPRJobs(WORKFLOW, destJobName), new Set());
@@ -74,8 +74,9 @@ describe('findPRJobs', () => {
 });
 
 describe('getJoinJobs', () => {
-    it('should not return PR join jobs', () => {
-        const getJoinJobs = rewireGetSrcForJoin.__get__('getJoinJobs');
+    const getJoinJobs = rewireGetSrcForJoin.__get__('getJoinJobs');
+
+    it('should not return PR join jobs if it is not chainPR workflow', () => {
         const destJobName = 'foo';
 
         assert.deepEqual(getJoinJobs(WORKFLOW, destJobName),
