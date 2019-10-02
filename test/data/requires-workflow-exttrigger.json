@@ -2,6 +2,6 @@
     "jobs": {
         "main": { "requires": ["~pr", "~commit"] },
         "foo": { "requires": ["main"] },
-        "bar": { "requires": ["foo", "~sd@1234:foo"] }
+        "bar": { "requires": ["foo", "sd@111:baz", "~sd@1234:foo"] }
     }
 }

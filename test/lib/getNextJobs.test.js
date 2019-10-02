@@ -3,6 +3,7 @@
 const assert = require('chai').assert;
 const getNextJobs = require('../../lib/getNextJobs');
 const WORKFLOW = require('../data/expected-output');
+const EXTERNAL_WORKFLOW = require('../data/expected-external');
 
 describe('getNextJobs', () => {
     it('should throw if trigger not provided', () => {
@@ -57,6 +58,10 @@ describe('getNextJobs', () => {
             trigger: 'PR-123:bar',
             chainPR: true
         }), []);
+    });
+
+    it('should figure out what jobs start next with parallel workflow with external', () => {
+        assert.deepEqual(getNextJobs(EXTERNAL_WORKFLOW, { trigger: 'sd@111:baz' }), ['bar']);
     });
 
     it('should figure out what jobs start next with parallel workflow', () => {
