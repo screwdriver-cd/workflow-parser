@@ -15,22 +15,27 @@ const EXPECTED_EXTERNAL = require('../data/expected-external');
 NO_EDGES.edges = [];
 
 describe('getWorkflow', () => {
-    it('should throw if it is not given correct input', () => {
-        assert.throws(() => getWorkflow({ config: {} }),
-            Error, 'No Job config provided');
+    it('should throw if it is not given correct input', async () => {
+        try {
+            await getWorkflow({ config: {} });
+        } catch (e) {
+            console.log(e);
+            assert.equal(e.message, 'No Job config provided');
+        }
     });
 
-    it('should convert a config with job-requires workflow to directed graph', () => {
-        assert.deepEqual(getWorkflow(REQUIRES_WORKFLOW),
-            EXPECTED_OUTPUT, 'requires-style workflow');
-        assert.deepEqual(getWorkflow(LEGACY_AND_REQUIRES_WORKFLOW),
-            EXPECTED_OUTPUT, 'both legacy and non-legacy workflows');
-        assert.deepEqual(getWorkflow(EXTERNAL_TRIGGER),
-            EXPECTED_EXTERNAL, 'requires-style workflow with external trigger');
+    it('should convert a config with job-requires workflow to directed graph', async () => {
+        const requires = await getWorkflow(REQUIRES_WORKFLOW);
+        const legacyRequires = await getWorkflow(LEGACY_AND_REQUIRES_WORKFLOW);
+        const external = await getWorkflow(EXTERNAL_TRIGGER);
+
+        assert.deepEqual(requires, EXPECTED_OUTPUT);
+        assert.deepEqual(legacyRequires, EXPECTED_OUTPUT);
+        assert.deepEqual(external, EXPECTED_EXTERNAL);
     });
 
-    it('should handle detatched jobs', () => {
-        const result = getWorkflow({
+    it('should handle detatched jobs', async () => {
+        const result = await getWorkflow({
             jobs: {
                 foo: {},
                 bar: { requires: ['foo'] }
@@ -48,8 +53,8 @@ describe('getWorkflow', () => {
         });
     });
 
-    it('should handle logical OR requires', () => {
-        const result = getWorkflow({
+    it('should handle logical OR requires', async () => {
+        const result = await getWorkflow({
             jobs: {
                 foo: { requires: ['~commit'] },
                 A: { requires: ['foo'] },
@@ -79,8 +84,8 @@ describe('getWorkflow', () => {
         });
     });
 
-    it('should handle logical OR and logial AND requires', () => {
-        const result = getWorkflow({
+    it('should handle logical OR and logial AND requires', async () => {
+        const result = await getWorkflow({
             jobs: {
                 foo: { requires: ['~commit'] },
                 A: { requires: ['foo'] },
@@ -114,8 +119,8 @@ describe('getWorkflow', () => {
         });
     });
 
-    it('should dedupe requires', () => {
-        const result = getWorkflow({
+    it('should dedupe requires', async () => {
+        const result = await getWorkflow({
             jobs: {
                 foo: { requires: ['A', 'A', 'A'] },
                 A: {}
@@ -135,8 +140,8 @@ describe('getWorkflow', () => {
         });
     });
 
-    it('should handle joins', () => {
-        const result = getWorkflow({
+    it('should handle joins', async () => {
+        const result = await getWorkflow({
             jobs: {
                 foo: { },
                 bar: { requires: ['foo'] },
