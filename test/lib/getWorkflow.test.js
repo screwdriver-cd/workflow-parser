@@ -174,6 +174,7 @@ describe('getWorkflow', () => {
         /* A -> B                                                   --> C
                 sd@111:external-level1 -> sd@222:external-level2
                 sd@333:external-level1 -> sd@444:external-level2
+                                          sd@555:external-level2
         */
 
         triggerFactoryMock.getDestFromSrc.withArgs('sd@123:A').resolves([
@@ -184,7 +185,10 @@ describe('getWorkflow', () => {
             'sd@222:external-level2'
         ]);
         triggerFactoryMock.getDestFromSrc.withArgs('sd@333:external-level1').resolves([
-            'sd@444:external-level2'
+            'sd@444:external-level2', 'sd@555:external-level2'
+        ]);
+        triggerFactoryMock.getDestFromSrc.withArgs('sd@555:external-level2').resolves([
+            'sd@666:external-level3'
         ]);
 
         const result = await getWorkflow({
@@ -220,7 +224,9 @@ describe('getWorkflow', () => {
                 { src: 'A', dest: 'sd@111:external-level1' },
                 { src: 'A', dest: 'sd@333:external-level1' },
                 { src: 'sd@111:external-level1', dest: 'sd@222:external-level2' },
-                { src: 'sd@333:external-level1', dest: 'sd@444:external-level2' }
+                { src: 'sd@333:external-level1', dest: 'sd@444:external-level2' },
+                { src: 'sd@333:external-level1', dest: 'sd@555:external-level2' },
+                { src: 'sd@555:external-level2', dest: 'sd@666:external-level3' }
             ]
         });
     });

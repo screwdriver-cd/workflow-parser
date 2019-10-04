@@ -1,6 +1,6 @@
 {
   "name": "screwdriver-workflow-parser",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Parses and converts pipeline configuration into a workflow",
   "main": "index.js",
   "scripts": {
