@@ -9,6 +9,7 @@ const EXTERNAL_TRIGGER = require('../data/requires-workflow-exttrigger');
 const EXPECTED_OUTPUT = require('../data/expected-output');
 const NO_EDGES = Object.assign({}, EXPECTED_OUTPUT);
 const EXPECTED_EXTERNAL = require('../data/expected-external');
+const EXPECTED_EXTERNAL_COMPLEX = require('../data/expected-external-complex');
 
 NO_EDGES.edges = [];
 
@@ -210,37 +211,6 @@ describe('getWorkflow', () => {
             }
         }, triggerFactoryMock, 123);
 
-        assert.deepEqual(result, {
-            nodes: [
-                { name: '~pr' },
-                { name: '~commit' },
-                { name: 'A' },
-                { name: 'B' },
-                { name: 'C' },
-                { name: 'sd@222:external-level2' },
-                { name: 'sd@444:external-level2' },
-                { name: 'sd@555:external-level2' },
-                { name: '~sd@888:external-level2' },
-                { name: '~sd@777:external-level1' },
-                { name: 'sd@111:external-level1' },
-                { name: 'sd@333:external-level1' },
-                { name: 'sd@666:external-level3' }
-            ],
-            edges: [
-                { src: 'A', dest: 'B' },
-                { src: '~sd@888:external-level2', dest: 'C' },
-                { src: 'B', dest: 'C', join: true },
-                { src: 'sd@222:external-level2', dest: 'C', join: true },
-                { src: 'sd@444:external-level2', dest: 'C', join: true },
-                { src: 'sd@555:external-level2', dest: 'C', join: true },
-                { src: 'A', dest: '~sd@777:external-level1' },
-                { src: 'A', dest: 'sd@111:external-level1' },
-                { src: 'A', dest: 'sd@333:external-level1' },
-                { src: 'sd@111:external-level1', dest: 'sd@222:external-level2' },
-                { src: 'sd@333:external-level1', dest: 'sd@444:external-level2' },
-                { src: 'sd@333:external-level1', dest: 'sd@555:external-level2' },
-                { src: 'sd@555:external-level2', dest: 'sd@666:external-level3' }
-            ]
-        });
+        assert.deepEqual(result, EXPECTED_EXTERNAL_COMPLEX);
     });
 });
