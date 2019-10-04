@@ -19,17 +19,16 @@ describe('getWorkflow', () => {
 
     it('should throw if it is not given correct input', async () => {
         try {
-            await getWorkflow({ config: {} });
+            await getWorkflow({ config: {} }, triggerFactoryMock);
         } catch (e) {
-            console.log(e);
             assert.equal(e.message, 'No Job config provided');
         }
     });
 
     it('should convert a config with job-requires workflow to directed graph', async () => {
-        const requires = await getWorkflow(REQUIRES_WORKFLOW);
-        const legacyRequires = await getWorkflow(LEGACY_AND_REQUIRES_WORKFLOW);
-        const external = await getWorkflow(EXTERNAL_TRIGGER);
+        const requires = await getWorkflow(REQUIRES_WORKFLOW, triggerFactoryMock);
+        const legacyRequires = await getWorkflow(LEGACY_AND_REQUIRES_WORKFLOW, triggerFactoryMock);
+        const external = await getWorkflow(EXTERNAL_TRIGGER, triggerFactoryMock);
 
         assert.deepEqual(requires, EXPECTED_OUTPUT);
         assert.deepEqual(legacyRequires, EXPECTED_OUTPUT);
@@ -42,7 +41,7 @@ describe('getWorkflow', () => {
                 foo: {},
                 bar: { requires: ['foo'] }
             }
-        });
+        }, triggerFactoryMock);
 
         assert.deepEqual(result, {
             nodes: [
@@ -63,7 +62,7 @@ describe('getWorkflow', () => {
                 B: { requires: ['foo'] },
                 C: { requires: ['~A', '~B', '~sd@1234:foo'] }
             }
-        });
+        }, triggerFactoryMock);
 
         assert.deepEqual(result, {
             nodes: [
@@ -96,7 +95,7 @@ describe('getWorkflow', () => {
                 D: {},
                 E: {}
             }
-        });
+        }, triggerFactoryMock);
 
         assert.deepEqual(result, {
             nodes: [
@@ -127,7 +126,7 @@ describe('getWorkflow', () => {
                 foo: { requires: ['A', 'A', 'A'] },
                 A: {}
             }
-        });
+        }, triggerFactoryMock);
 
         assert.deepEqual(result, {
             nodes: [
@@ -150,7 +149,7 @@ describe('getWorkflow', () => {
                 baz: { requires: ['foo'] },
                 bax: { requires: ['bar', 'baz'] }
             }
-        });
+        }, triggerFactoryMock);
 
         assert.deepEqual(result, {
             nodes: [
@@ -171,15 +170,18 @@ describe('getWorkflow', () => {
     });
 
     it('should handle external upstream & downstream join', async () => {
-        /* A -> B                                                   --> C
-                sd@111:external-level1 -> sd@222:external-level2
-                sd@333:external-level1 -> sd@444:external-level2
-                                          sd@555:external-level2
+        /* A - B                                                   - C
+             \ sd@111:external-level1 ->  sd@222:external-level2    /
+             \ sd@333:external-level1 ->  sd@444:external-level2    /
+                                          sd@555:external-level2    /
+             \ ~sd@777:external-level1 -> ~sd@888:external-level2   /
         */
-
         triggerFactoryMock.getDestFromSrc.withArgs('sd@123:A').resolves([
             'sd@111:external-level1',
             'sd@333:external-level1'
+        ]);
+        triggerFactoryMock.getDestFromSrc.withArgs('~sd@123:A').resolves([
+            '~sd@777:external-level1'
         ]);
         triggerFactoryMock.getDestFromSrc.withArgs('sd@111:external-level1').resolves([
             'sd@222:external-level2'
@@ -190,6 +192,9 @@ describe('getWorkflow', () => {
         triggerFactoryMock.getDestFromSrc.withArgs('sd@555:external-level2').resolves([
             'sd@666:external-level3'
         ]);
+        triggerFactoryMock.getDestFromSrc.withArgs('~sd@777:external-level1').resolves([
+            '~sd@888:external-level2'
+        ]);
 
         const result = await getWorkflow({
             jobs: {
@@ -198,12 +203,13 @@ describe('getWorkflow', () => {
                 C: { requires: [
                     'B',
                     'sd@222:external-level2',
-                    'sd@444:external-level2'
+                    'sd@444:external-level2',
+                    'sd@555:external-level2',
+                    '~sd@888:external-level2'
                 ] }
             }
         }, triggerFactoryMock, 123);
 
-        console.log(result);
         assert.deepEqual(result, {
             nodes: [
                 { name: '~pr' },
@@ -211,16 +217,23 @@ describe('getWorkflow', () => {
                 { name: 'A' },
                 { name: 'B' },
                 { name: 'C' },
-                { name: 'sd@111:external-level1' },
                 { name: 'sd@222:external-level2' },
+                { name: 'sd@444:external-level2' },
+                { name: 'sd@555:external-level2' },
+                { name: '~sd@888:external-level2' },
+                { name: '~sd@777:external-level1' },
+                { name: 'sd@111:external-level1' },
                 { name: 'sd@333:external-level1' },
-                { name: 'sd@444:external-level2' }
+                { name: 'sd@666:external-level3' }
             ],
             edges: [
                 { src: 'A', dest: 'B' },
+                { src: '~sd@888:external-level2', dest: 'C' },
                 { src: 'B', dest: 'C', join: true },
                 { src: 'sd@222:external-level2', dest: 'C', join: true },
                 { src: 'sd@444:external-level2', dest: 'C', join: true },
+                { src: 'sd@555:external-level2', dest: 'C', join: true },
+                { src: 'A', dest: '~sd@777:external-level1' },
                 { src: 'A', dest: 'sd@111:external-level1' },
                 { src: 'A', dest: 'sd@333:external-level1' },
                 { src: 'sd@111:external-level1', dest: 'sd@222:external-level2' },
