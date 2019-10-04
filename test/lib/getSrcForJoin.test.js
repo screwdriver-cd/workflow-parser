@@ -4,6 +4,7 @@ const assert = require('chai').assert;
 const getSrcForJoin = require('../../lib/getSrcForJoin');
 const WORKFLOW = require('../data/join-workflow');
 const EXTERNAL_WORKFLOW = require('../data/expected-external');
+const EXTERNAL_COMPLEX_WORKFLOW = require('../data/expected-external-complex');
 const rewire = require('rewire');
 
 const rewireGetSrcForJoin = rewire('../../lib/getSrcForJoin');
@@ -34,6 +35,21 @@ describe('getSrcForJoin', () => {
         }), [
             { name: 'foo' },
             { name: 'sd@111:baz' }
+        ]);
+    });
+
+    it('should figure out what src for the job for a complex workflow', () => {
+        // src nodes for join job
+        assert.deepEqual(getSrcForJoin(EXTERNAL_COMPLEX_WORKFLOW,
+            { jobName: 'A' }), []);
+        assert.deepEqual(getSrcForJoin(EXTERNAL_COMPLEX_WORKFLOW,
+            { jobName: 'B' }), []);
+        assert.deepEqual(getSrcForJoin(EXTERNAL_COMPLEX_WORKFLOW,
+            { jobName: 'C' }), [
+            { name: 'B' },
+            { name: 'sd@222:external-level2' },
+            { name: 'sd@444:external-level2' },
+            { name: 'sd@555:external-level2' }
         ]);
     });
 });
