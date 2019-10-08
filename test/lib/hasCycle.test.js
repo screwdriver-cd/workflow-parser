@@ -31,6 +31,44 @@ describe('hasCyles', () => {
         assert.isTrue(hasCycle(workflow));
     });
 
+    it('should return true if a workflow has a cycle with external', () => {
+        const externalWorkflow = {
+            nodes: [
+                { name: '~pr' },
+                { name: '~commit' },
+                { name: 'A' },
+                { name: 'B' },
+                { name: 'C' },
+                { name: 'sd@222:external-level2' },
+                { name: 'sd@444:external-level2' },
+                { name: 'sd@555:external-level2' },
+                { name: '~sd@888:external-level2' },
+                { name: '~sd@777:external-level1' },
+                { name: 'sd@111:external-level1' },
+                { name: 'sd@333:external-level1' },
+                { name: 'sd@666:external-level3' }
+            ],
+            edges: [
+                { src: 'A', dest: 'B' },
+                { src: '~sd@888:external-level2', dest: 'C' },
+                { src: 'B', dest: 'C', join: true },
+                { src: 'sd@222:external-level2', dest: 'C', join: true },
+                { src: 'sd@444:external-level2', dest: 'C', join: true },
+                { src: 'sd@555:external-level2', dest: 'C', join: true },
+                { src: 'A', dest: '~sd@777:external-level1' },
+                { src: 'A', dest: 'sd@111:external-level1' },
+                { src: 'A', dest: 'sd@333:external-level1' },
+                { src: 'sd@111:external-level1', dest: 'sd@222:external-level2' },
+                { src: 'sd@333:external-level1', dest: 'sd@444:external-level2' },
+                { src: 'sd@333:external-level1', dest: 'sd@555:external-level2' },
+                { src: 'sd@555:external-level2', dest: 'sd@666:external-level3' },
+                { src: 'sd@555:external-level2', dest: 'A' }
+            ]
+        };
+
+        assert.isTrue(hasCycle(externalWorkflow));
+    });
+
     it('should return true if a detached workflow has a cycle', () => {
         const workflow = {
             nodes: [
