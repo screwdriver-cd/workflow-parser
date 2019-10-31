@@ -5,6 +5,7 @@
         { "name": "main" },
         { "name": "foo" },
         { "name": "bar" },
+        { "name": "promote" },
         { "name": "baz" },
         { "name": "~release" },
         { "name": "~tag" }
@@ -14,6 +15,7 @@
         { "src": "~commit", "dest": "main" },
         { "src": "main", "dest": "foo" },
         { "src": "foo", "dest": "bar" },
+        { "src": "promote", "dest": "bar" },
         { "src": "~release", "dest": "baz" },
         { "src": "~tag", "dest": "baz" }
     ]
