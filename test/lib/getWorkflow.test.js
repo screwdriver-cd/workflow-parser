@@ -13,7 +13,7 @@ const EXPECTED_EXTERNAL_COMPLEX = require('../data/expected-external-complex');
 
 NO_EDGES.edges = [];
 
-describe.only('getWorkflow', () => {
+describe('getWorkflow', () => {
     const triggerFactoryMock = {
         getDestFromSrc: sinon.stub().resolves([])
     };
