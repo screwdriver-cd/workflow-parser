@@ -5,6 +5,7 @@
         { "name": "main" },
         { "name": "foo" },
         { "name": "bar" },
+        { "name": "sd@111:baz" },
         { "name": "~sd@1234:foo" }
     ],
     "edges": [
@@ -12,6 +13,7 @@
         { "src": "~commit", "dest": "main" },
         { "src": "main", "dest": "foo" },
         { "src": "~sd@1234:foo", "dest": "bar" },
-        { "src": "foo", "dest": "bar" }
+        { "src": "foo", "dest": "bar", "join": true },
+        { "src": "sd@111:baz", "dest": "bar", "join": true }
     ]
 }

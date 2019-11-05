@@ -3,6 +3,8 @@
 const assert = require('chai').assert;
 const getSrcForJoin = require('../../lib/getSrcForJoin');
 const WORKFLOW = require('../data/join-workflow');
+const EXTERNAL_WORKFLOW = require('../data/expected-external');
+const EXTERNAL_COMPLEX_WORKFLOW = require('../data/expected-external-complex');
 const rewire = require('rewire');
 
 const rewireGetSrcForJoin = rewire('../../lib/getSrcForJoin');
@@ -24,6 +26,31 @@ describe('getSrcForJoin', () => {
         ]);
         // return empty arry if it's not a join job
         assert.deepEqual(getSrcForJoin(WORKFLOW, { jobName: 'bar' }), []);
+    });
+
+    it('should figure out what src for the job if it is a join and external job', () => {
+        // src nodes for join job
+        assert.deepEqual(getSrcForJoin(EXTERNAL_WORKFLOW, {
+            jobName: 'bar'
+        }), [
+            { name: 'foo' },
+            { name: 'sd@111:baz' }
+        ]);
+    });
+
+    it('should figure out what src for the job for a complex workflow', () => {
+        // src nodes for join job
+        assert.deepEqual(getSrcForJoin(EXTERNAL_COMPLEX_WORKFLOW,
+            { jobName: 'A' }), []);
+        assert.deepEqual(getSrcForJoin(EXTERNAL_COMPLEX_WORKFLOW,
+            { jobName: 'B' }), []);
+        assert.deepEqual(getSrcForJoin(EXTERNAL_COMPLEX_WORKFLOW,
+            { jobName: 'C' }), [
+            { name: 'B' },
+            { name: 'sd@222:external-level2' },
+            { name: 'sd@444:external-level2' },
+            { name: 'sd@555:external-level2' }
+        ]);
     });
 });
 
@@ -47,6 +74,13 @@ describe('findJobs', () => {
 
         assert.deepEqual(findJobs(WORKFLOW, destJobName),
             new Set([{ name: 'main', id: 1 }, { name: 'other_main', id: 2 }]));
+    });
+
+    it('should find jobs when search job is joined job and is external', () => {
+        const destJobName = 'bar';
+
+        assert.deepEqual(findJobs(EXTERNAL_WORKFLOW, destJobName),
+            new Set([{ name: 'foo' }, { name: 'sd@111:baz' }]));
     });
 
     it('should not find jobs when search job is not joined job', () => {

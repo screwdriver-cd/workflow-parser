@@ -3,6 +3,8 @@
 const assert = require('chai').assert;
 const getNextJobs = require('../../lib/getNextJobs');
 const WORKFLOW = require('../data/expected-output');
+const EXTERNAL_WORKFLOW = require('../data/expected-external');
+const EXTERNAL_COMPLEX_WORKFLOW = require('../data/expected-external-complex');
 
 describe('getNextJobs', () => {
     it('should throw if trigger not provided', () => {
@@ -59,6 +61,10 @@ describe('getNextJobs', () => {
         }), []);
     });
 
+    it('should figure out what jobs start next with parallel workflow with external', () => {
+        assert.deepEqual(getNextJobs(EXTERNAL_WORKFLOW, { trigger: 'sd@111:baz' }), ['bar']);
+    });
+
     it('should figure out what jobs start next with parallel workflow', () => {
         const parallelWorkflow = {
             edges: [
@@ -108,5 +114,18 @@ describe('getNextJobs', () => {
         // trigger by a pull request on "bar-foo-prod" branch
         assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~pr:bar-foo-prod',
             prNum: '123' }), ['PR-123:f', 'PR-123:g']);
+    });
+
+    it('should figure out what jobs start next with external workflow', () => {
+        /* A - B                                                   - C
+             \ sd@111:external-level1 ->  sd@222:external-level2    /
+             \ sd@333:external-level1 ->  sd@444:external-level2    /
+                                          sd@555:external-level2    /
+             \ ~sd@777:external-level1 -> ~sd@888:external-level2   /
+        */
+        assert.deepEqual(getNextJobs(EXTERNAL_COMPLEX_WORKFLOW, { trigger: 'A' }),
+            ['B', '~sd@777:external-level1', 'sd@111:external-level1', 'sd@333:external-level1']);
+        assert.deepEqual(getNextJobs(EXTERNAL_COMPLEX_WORKFLOW,
+            { trigger: 'B' }), ['C']);
     });
 });
