@@ -5,6 +5,7 @@ const getNextJobs = require('../../lib/getNextJobs');
 const WORKFLOW = require('../data/expected-output');
 const EXTERNAL_WORKFLOW = require('../data/expected-external');
 const EXTERNAL_COMPLEX_WORKFLOW = require('../data/expected-external-complex');
+const EXTERNAL_JOIN_WORKFLOW = require('../data/external-join');
 
 describe('getNextJobs', () => {
     it('should throw if trigger not provided', () => {
@@ -127,5 +128,14 @@ describe('getNextJobs', () => {
             ['B', 'sd@777:external-level1', 'sd@111:external-level1', 'sd@333:external-level1']);
         assert.deepEqual(getNextJobs(EXTERNAL_COMPLEX_WORKFLOW,
             { trigger: 'B' }), ['C']);
+    });
+
+    it.only('should not return external job on pr trigger', () => {
+        assert.deepEqual(getNextJobs(EXTERNAL_JOIN_WORKFLOW,
+            { trigger: '~pr', prNum: '1', chainPR: true }), ['PR-1:main']);
+        assert.deepEqual(getNextJobs(EXTERNAL_JOIN_WORKFLOW,
+            { trigger: 'PR-1:main', prNum: '1', chainPR: true }), ['PR-1:foo']);
+        assert.deepEqual(getNextJobs(EXTERNAL_JOIN_WORKFLOW,
+            { trigger: 'PR-1:foo', prNum: '1', chainPR: true }), []);
     });
 });
