@@ -130,7 +130,7 @@ describe('getNextJobs', () => {
             { trigger: 'B' }), ['C']);
     });
 
-    it.only('should not return external job on pr trigger', () => {
+    it('should not return external job on pr trigger', () => {
         assert.deepEqual(getNextJobs(EXTERNAL_JOIN_WORKFLOW,
             { trigger: '~pr', prNum: '1', chainPR: true }), ['PR-1:main']);
         assert.deepEqual(getNextJobs(EXTERNAL_JOIN_WORKFLOW,
