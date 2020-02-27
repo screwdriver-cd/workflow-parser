@@ -5,7 +5,7 @@ const getNextJobs = require('../../lib/getNextJobs');
 const WORKFLOW = require('../data/expected-output');
 const EXTERNAL_WORKFLOW = require('../data/expected-external');
 const EXTERNAL_COMPLEX_WORKFLOW = require('../data/expected-external-complex');
-const EXTERNAL_JOIN_WORKFLOW = require('../data/external-join');
+const EXTERNAL_JOIN_WORKFLOW = require('../data/expected-external-join');
 
 describe('getNextJobs', () => {
     it('should throw if trigger not provided', () => {

@@ -12,9 +12,9 @@
         { "src": "~pr", "dest": "main" },
         { "src": "~commit", "dest": "main" },
         { "src": "main", "dest": "foo" },
-        { "src": "foo", "dest": "sd@111:baz" },
-        { "src": "foo", "dest": "sd@1234:foo" },
+        { "src": "sd@111:baz", "dest": "bar", "join": true },
         { "src": "sd@1234:foo", "dest": "bar", "join": true },
-        { "src": "sd@111:baz", "dest": "bar", "join": true }
+        { "src": "foo", "dest": "sd@111:baz" },
+        { "src": "foo", "dest": "sd@1234:foo" }
     ]
 }

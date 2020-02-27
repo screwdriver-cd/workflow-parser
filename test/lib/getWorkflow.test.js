@@ -10,6 +10,7 @@ const EXPECTED_OUTPUT = require('../data/expected-output');
 const NO_EDGES = Object.assign({}, EXPECTED_OUTPUT);
 const EXPECTED_EXTERNAL = require('../data/expected-external');
 const EXPECTED_EXTERNAL_COMPLEX = require('../data/expected-external-complex');
+const EXPECTED_EXTERNAL_JOIN = require('../data/expected-external-join');
 
 NO_EDGES.edges = [];
 
@@ -168,6 +169,22 @@ describe('getWorkflow', () => {
                 { src: 'baz', dest: 'bax', join: true }
             ]
         });
+    });
+
+    it('should remove ~ for downstream external trigger', async () => {
+        triggerFactoryMock.getDestFromSrc.withArgs('sd@123:foo').resolves([
+            'sd@111:baz',
+            'sd@1234:foo'
+        ]);
+        const result = await getWorkflow({
+            jobs: {
+                main: { requires: ['~pr', '~commit'] },
+                foo: { requires: ['main'] },
+                bar: { requires: ['sd@111:baz', 'sd@1234:foo'] }
+            }
+        }, triggerFactoryMock, 123);
+
+        assert.deepEqual(result, EXPECTED_EXTERNAL_JOIN);
     });
 
     it('should handle external upstream & downstream join', async () => {
