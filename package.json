@@ -1,6 +1,6 @@
 {
   "name": "screwdriver-workflow-parser",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Parses and converts pipeline configuration into a workflow",
   "main": "index.js",
   "scripts": {
@@ -42,7 +42,7 @@
     "sinon": "^7.5.0"
   },
   "dependencies": {
-    "screwdriver-data-schema": "^19.0.0"
+    "screwdriver-data-schema": "^20.0.0"
   },
   "release": {
     "debug": false,
