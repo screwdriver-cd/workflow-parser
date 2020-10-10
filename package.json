@@ -42,6 +42,7 @@
     "sinon": "^7.5.0"
   },
   "dependencies": {
+    "@hapi/hoek": "^9.1.0",
     "screwdriver-data-schema": "^20.0.0"
   },
   "release": {
