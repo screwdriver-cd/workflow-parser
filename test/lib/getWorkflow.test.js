@@ -37,6 +37,29 @@ describe('getWorkflow', () => {
         assert.deepEqual(external, EXPECTED_EXTERNAL);
     });
 
+    it('should handle displayName', async () => {
+        const result = await getWorkflow({
+            jobs: {
+                foo: {
+                    annotations: {
+                        'screwdriver.cd/displayName': 'baz'
+                    }
+                },
+                bar: {}
+            }
+        }, triggerFactoryMock);
+
+        assert.deepEqual(result, {
+            nodes: [
+                { name: '~pr' },
+                { name: '~commit' },
+                { name: 'foo', displayName: 'baz' },
+                { name: 'bar' }
+            ],
+            edges: []
+        });
+    });
+
     it('should handle detatched jobs', async () => {
         const result = await getWorkflow({
             jobs: {
