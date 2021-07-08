@@ -1,16 +1,16 @@
 'use strict';
 
-const assert = require('chai').assert;
+const { assert } = require('chai');
 const sinon = require('sinon');
 const getWorkflow = require('../../lib/getWorkflow');
-const REQUIRES_WORKFLOW = require('../data/requires-workflow');
-const LEGACY_AND_REQUIRES_WORKFLOW = Object.assign({}, REQUIRES_WORKFLOW);
-const EXTERNAL_TRIGGER = require('../data/requires-workflow-exttrigger');
-const EXPECTED_OUTPUT = require('../data/expected-output');
-const NO_EDGES = Object.assign({}, EXPECTED_OUTPUT);
-const EXPECTED_EXTERNAL = require('../data/expected-external');
-const EXPECTED_EXTERNAL_COMPLEX = require('../data/expected-external-complex');
-const EXPECTED_EXTERNAL_JOIN = require('../data/expected-external-join');
+const REQUIRES_WORKFLOW = require('../data/requires-workflow.json');
+const LEGACY_AND_REQUIRES_WORKFLOW = { ...REQUIRES_WORKFLOW };
+const EXTERNAL_TRIGGER = require('../data/requires-workflow-exttrigger.json');
+const EXPECTED_OUTPUT = require('../data/expected-output.json');
+const NO_EDGES = { ...EXPECTED_OUTPUT };
+const EXPECTED_EXTERNAL = require('../data/expected-external.json');
+const EXPECTED_EXTERNAL_COMPLEX = require('../data/expected-external-complex.json');
+const EXPECTED_EXTERNAL_JOIN = require('../data/expected-external-join.json');
 
 NO_EDGES.edges = [];
 
@@ -38,56 +38,55 @@ describe('getWorkflow', () => {
     });
 
     it('should handle displayName', async () => {
-        const result = await getWorkflow({
-            jobs: {
-                foo: {
-                    annotations: {
-                        'screwdriver.cd/displayName': 'baz'
-                    }
-                },
-                bar: {}
-            }
-        }, triggerFactoryMock);
+        const result = await getWorkflow(
+            {
+                jobs: {
+                    foo: {
+                        annotations: {
+                            'screwdriver.cd/displayName': 'baz'
+                        }
+                    },
+                    bar: {}
+                }
+            },
+            triggerFactoryMock
+        );
 
         assert.deepEqual(result, {
-            nodes: [
-                { name: '~pr' },
-                { name: '~commit' },
-                { name: 'foo', displayName: 'baz' },
-                { name: 'bar' }
-            ],
+            nodes: [{ name: '~pr' }, { name: '~commit' }, { name: 'foo', displayName: 'baz' }, { name: 'bar' }],
             edges: []
         });
     });
 
     it('should handle detatched jobs', async () => {
-        const result = await getWorkflow({
-            jobs: {
-                foo: {},
-                bar: { requires: ['foo'] }
-            }
-        }, triggerFactoryMock);
+        const result = await getWorkflow(
+            {
+                jobs: {
+                    foo: {},
+                    bar: { requires: ['foo'] }
+                }
+            },
+            triggerFactoryMock
+        );
 
         assert.deepEqual(result, {
-            nodes: [
-                { name: '~pr' },
-                { name: '~commit' },
-                { name: 'foo' },
-                { name: 'bar' }
-            ],
+            nodes: [{ name: '~pr' }, { name: '~commit' }, { name: 'foo' }, { name: 'bar' }],
             edges: [{ src: 'foo', dest: 'bar' }]
         });
     });
 
     it('should handle logical OR requires', async () => {
-        const result = await getWorkflow({
-            jobs: {
-                foo: { requires: ['~commit'] },
-                A: { requires: ['foo'] },
-                B: { requires: ['foo'] },
-                C: { requires: ['~A', '~B', '~sd@1234:foo'] }
-            }
-        }, triggerFactoryMock);
+        const result = await getWorkflow(
+            {
+                jobs: {
+                    foo: { requires: ['~commit'] },
+                    A: { requires: ['foo'] },
+                    B: { requires: ['foo'] },
+                    C: { requires: ['~A', '~B', '~sd@1234:foo'] }
+                }
+            },
+            triggerFactoryMock
+        );
 
         assert.deepEqual(result, {
             nodes: [
@@ -111,16 +110,19 @@ describe('getWorkflow', () => {
     });
 
     it('should handle logical OR and logial AND requires', async () => {
-        const result = await getWorkflow({
-            jobs: {
-                foo: { requires: ['~commit'] },
-                A: { requires: ['foo'] },
-                B: { requires: ['foo'] },
-                C: { requires: ['~A', '~B', 'D', 'E'] },
-                D: {},
-                E: {}
-            }
-        }, triggerFactoryMock);
+        const result = await getWorkflow(
+            {
+                jobs: {
+                    foo: { requires: ['~commit'] },
+                    A: { requires: ['foo'] },
+                    B: { requires: ['foo'] },
+                    C: { requires: ['~A', '~B', 'D', 'E'] },
+                    D: {},
+                    E: {}
+                }
+            },
+            triggerFactoryMock
+        );
 
         assert.deepEqual(result, {
             nodes: [
@@ -146,35 +148,34 @@ describe('getWorkflow', () => {
     });
 
     it('should dedupe requires', async () => {
-        const result = await getWorkflow({
-            jobs: {
-                foo: { requires: ['A', 'A', 'A'] },
-                A: {}
-            }
-        }, triggerFactoryMock);
+        const result = await getWorkflow(
+            {
+                jobs: {
+                    foo: { requires: ['A', 'A', 'A'] },
+                    A: {}
+                }
+            },
+            triggerFactoryMock
+        );
 
         assert.deepEqual(result, {
-            nodes: [
-                { name: '~pr' },
-                { name: '~commit' },
-                { name: 'foo' },
-                { name: 'A' }
-            ],
-            edges: [
-                { src: 'A', dest: 'foo' }
-            ]
+            nodes: [{ name: '~pr' }, { name: '~commit' }, { name: 'foo' }, { name: 'A' }],
+            edges: [{ src: 'A', dest: 'foo' }]
         });
     });
 
     it('should handle joins', async () => {
-        const result = await getWorkflow({
-            jobs: {
-                foo: { },
-                bar: { requires: ['foo'] },
-                baz: { requires: ['foo'] },
-                bax: { requires: ['bar', 'baz'] }
-            }
-        }, triggerFactoryMock);
+        const result = await getWorkflow(
+            {
+                jobs: {
+                    foo: {},
+                    bar: { requires: ['foo'] },
+                    baz: { requires: ['foo'] },
+                    bax: { requires: ['bar', 'baz'] }
+                }
+            },
+            triggerFactoryMock
+        );
 
         assert.deepEqual(result, {
             nodes: [
@@ -195,17 +196,18 @@ describe('getWorkflow', () => {
     });
 
     it('should remove ~ for downstream external trigger', async () => {
-        triggerFactoryMock.getDestFromSrc.withArgs('sd@123:foo').resolves([
-            'sd@111:baz',
-            'sd@1234:foo'
-        ]);
-        const result = await getWorkflow({
-            jobs: {
-                main: { requires: ['~pr', '~commit'] },
-                foo: { requires: ['main'] },
-                bar: { requires: ['sd@111:baz', 'sd@1234:foo'] }
-            }
-        }, triggerFactoryMock, 123);
+        triggerFactoryMock.getDestFromSrc.withArgs('sd@123:foo').resolves(['sd@111:baz', 'sd@1234:foo']);
+        const result = await getWorkflow(
+            {
+                jobs: {
+                    main: { requires: ['~pr', '~commit'] },
+                    foo: { requires: ['main'] },
+                    bar: { requires: ['sd@111:baz', 'sd@1234:foo'] }
+                }
+            },
+            triggerFactoryMock,
+            123
+        );
 
         assert.deepEqual(result, EXPECTED_EXTERNAL_JOIN);
     });
@@ -217,39 +219,36 @@ describe('getWorkflow', () => {
                                           sd@555:external-level2    /
              \ ~sd@777:external-level1 -> ~sd@888:external-level2   /
         */
-        triggerFactoryMock.getDestFromSrc.withArgs('sd@123:A').resolves([
-            'sd@111:external-level1',
-            'sd@333:external-level1'
-        ]);
-        triggerFactoryMock.getDestFromSrc.withArgs('~sd@123:A').resolves([
-            '~sd@777:external-level1'
-        ]);
-        triggerFactoryMock.getDestFromSrc.withArgs('sd@111:external-level1').resolves([
-            'sd@222:external-level2'
-        ]);
-        triggerFactoryMock.getDestFromSrc.withArgs('sd@333:external-level1').resolves([
-            'sd@444:external-level2', 'sd@555:external-level2'
-        ]);
-        triggerFactoryMock.getDestFromSrc.withArgs('sd@555:external-level2').resolves([
-            'sd@666:external-level3'
-        ]);
-        triggerFactoryMock.getDestFromSrc.withArgs('~sd@777:external-level1').resolves([
-            '~sd@888:external-level2'
-        ]);
+        triggerFactoryMock.getDestFromSrc
+            .withArgs('sd@123:A')
+            .resolves(['sd@111:external-level1', 'sd@333:external-level1']);
+        triggerFactoryMock.getDestFromSrc.withArgs('~sd@123:A').resolves(['~sd@777:external-level1']);
+        triggerFactoryMock.getDestFromSrc.withArgs('sd@111:external-level1').resolves(['sd@222:external-level2']);
+        triggerFactoryMock.getDestFromSrc
+            .withArgs('sd@333:external-level1')
+            .resolves(['sd@444:external-level2', 'sd@555:external-level2']);
+        triggerFactoryMock.getDestFromSrc.withArgs('sd@555:external-level2').resolves(['sd@666:external-level3']);
+        triggerFactoryMock.getDestFromSrc.withArgs('~sd@777:external-level1').resolves(['~sd@888:external-level2']);
 
-        const result = await getWorkflow({
-            jobs: {
-                A: { },
-                B: { requires: ['A'] },
-                C: { requires: [
-                    'B',
-                    'sd@222:external-level2',
-                    'sd@444:external-level2',
-                    'sd@555:external-level2',
-                    '~sd@888:external-level2'
-                ] }
-            }
-        }, triggerFactoryMock, 123);
+        const result = await getWorkflow(
+            {
+                jobs: {
+                    A: {},
+                    B: { requires: ['A'] },
+                    C: {
+                        requires: [
+                            'B',
+                            'sd@222:external-level2',
+                            'sd@444:external-level2',
+                            'sd@555:external-level2',
+                            '~sd@888:external-level2'
+                        ]
+                    }
+                }
+            },
+            triggerFactoryMock,
+            123
+        );
 
         assert.deepEqual(result, EXPECTED_EXTERNAL_COMPLEX);
     });

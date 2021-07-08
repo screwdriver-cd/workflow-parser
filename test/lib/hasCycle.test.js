@@ -1,6 +1,6 @@
 'use strict';
 
-const assert = require('chai').assert;
+const { assert } = require('chai');
 const hasCycle = require('../../lib/hasCycle');
 
 describe('hasCyles', () => {
@@ -71,14 +71,7 @@ describe('hasCyles', () => {
 
     it('should return true if a detached workflow has a cycle', () => {
         const workflow = {
-            nodes: [
-                { name: '~pr' },
-                { name: '~commit' },
-                { name: 'A' },
-                { name: 'B' },
-                { name: 'C' },
-                { name: 'D' }
-            ],
+            nodes: [{ name: '~pr' }, { name: '~commit' }, { name: 'A' }, { name: 'B' }, { name: 'C' }, { name: 'D' }],
             edges: [
                 { src: '~commit', dest: 'A' }, // start
                 { src: 'A', dest: 'B' }, // end
@@ -92,11 +85,7 @@ describe('hasCyles', () => {
 
     it('should return true if a job requires itself', () => {
         const workflow = {
-            nodes: [
-                { name: '~pr' },
-                { name: '~commit' },
-                { name: 'A' }
-            ],
+            nodes: [{ name: '~pr' }, { name: '~commit' }, { name: 'A' }],
             edges: [
                 { src: '~commit', dest: 'A' }, // start
                 { src: 'A', dest: 'A' } // cycle
@@ -108,12 +97,7 @@ describe('hasCyles', () => {
 
     it('should return false if a workflow does not have a cycle', () => {
         const workflow = {
-            nodes: [
-                { name: '~pr' },
-                { name: '~commit' },
-                { name: 'A' },
-                { name: 'B' }
-            ],
+            nodes: [{ name: '~pr' }, { name: '~commit' }, { name: 'A' }, { name: 'B' }],
             edges: [
                 { src: '~commit', dest: 'A' }, // start
                 { src: 'A', dest: 'B' } // end
@@ -125,13 +109,7 @@ describe('hasCyles', () => {
 
     it('should return false if workflow contains join but no cycle', () => {
         const workflow = {
-            nodes: [
-                { name: '~pr' },
-                { name: '~commit' },
-                { name: 'A' },
-                { name: 'B' },
-                { name: 'C' }
-            ],
+            nodes: [{ name: '~pr' }, { name: '~commit' }, { name: 'A' }, { name: 'B' }, { name: 'C' }],
             edges: [
                 { src: '~commit', dest: 'A' }, // start
                 { src: '~commit', dest: 'B' }, // start
