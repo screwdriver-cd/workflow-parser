@@ -1,29 +1,34 @@
 'use strict';
 
-const assert = require('chai').assert;
+const { assert } = require('chai');
 const getNextJobs = require('../../lib/getNextJobs');
-const WORKFLOW = require('../data/expected-output');
-const EXTERNAL_WORKFLOW = require('../data/expected-external');
-const EXTERNAL_COMPLEX_WORKFLOW = require('../data/expected-external-complex');
-const EXTERNAL_JOIN_WORKFLOW = require('../data/expected-external-join');
+const WORKFLOW = require('../data/expected-output.json');
+const EXTERNAL_WORKFLOW = require('../data/expected-external.json');
+const EXTERNAL_COMPLEX_WORKFLOW = require('../data/expected-external-complex.json');
+const EXTERNAL_JOIN_WORKFLOW = require('../data/expected-external-join.json');
 
 describe('getNextJobs', () => {
     it('should throw if trigger not provided', () => {
-        assert.throws(() => getNextJobs(WORKFLOW, {}),
-            Error, 'Must provide a trigger');
+        assert.throws(() => getNextJobs(WORKFLOW, {}), Error, 'Must provide a trigger');
     });
 
     it('should throw if prNum not provided for ~pr events', () => {
-        assert.throws(() => getNextJobs(WORKFLOW, { trigger: '~pr' }),
-            Error, 'Must provide a PR number with "~pr" trigger');
+        assert.throws(
+            () => getNextJobs(WORKFLOW, { trigger: '~pr' }),
+            Error,
+            'Must provide a PR number with "~pr" trigger'
+        );
     });
 
     it('should figure out what jobs start next', () => {
         // trigger for a pr event
-        assert.deepEqual(getNextJobs(WORKFLOW, {
-            trigger: '~pr',
-            prNum: '123'
-        }), ['PR-123:main']);
+        assert.deepEqual(
+            getNextJobs(WORKFLOW, {
+                trigger: '~pr',
+                prNum: '123'
+            }),
+            ['PR-123:main']
+        );
         // trigger for commit event
         assert.deepEqual(getNextJobs(WORKFLOW, { trigger: '~commit' }), ['main']);
         // trigger for release event
@@ -39,27 +44,38 @@ describe('getNextJobs', () => {
         // trigger after non-existing job "main"
         assert.deepEqual(getNextJobs(WORKFLOW, { trigger: 'banana' }), []);
         // trigger for a pr event with chainPR
-        assert.deepEqual(getNextJobs(WORKFLOW, {
-            trigger: '~pr',
-            prNum: '123',
-            chainPR: true
-        }),
-        ['PR-123:main']);
+        assert.deepEqual(
+            getNextJobs(WORKFLOW, {
+                trigger: '~pr',
+                prNum: '123',
+                chainPR: true
+            }),
+            ['PR-123:main']
+        );
         // trigger after job "PR-123:main" with chainPR
-        assert.deepEqual(getNextJobs(WORKFLOW, {
-            trigger: 'PR-123:main',
-            chainPR: true
-        }), ['PR-123:foo']);
+        assert.deepEqual(
+            getNextJobs(WORKFLOW, {
+                trigger: 'PR-123:main',
+                chainPR: true
+            }),
+            ['PR-123:foo']
+        );
         // trigger after job "PR-123:foo" with chainPR
-        assert.deepEqual(getNextJobs(WORKFLOW, {
-            trigger: 'PR-123:foo',
-            chainPR: true
-        }), ['PR-123:bar']);
+        assert.deepEqual(
+            getNextJobs(WORKFLOW, {
+                trigger: 'PR-123:foo',
+                chainPR: true
+            }),
+            ['PR-123:bar']
+        );
         // trigger after job "PR-123:var" with chainPR
-        assert.deepEqual(getNextJobs(WORKFLOW, {
-            trigger: 'PR-123:bar',
-            chainPR: true
-        }), []);
+        assert.deepEqual(
+            getNextJobs(WORKFLOW, {
+                trigger: 'PR-123:bar',
+                chainPR: true
+            }),
+            []
+        );
     });
 
     it('should figure out what jobs start next with parallel workflow with external', () => {
@@ -77,8 +93,7 @@ describe('getNextJobs', () => {
         };
 
         // trigger multiple after job "a"
-        assert.deepEqual(getNextJobs(parallelWorkflow, { trigger: 'a' }),
-            ['b', 'c', 'd']);
+        assert.deepEqual(getNextJobs(parallelWorkflow, { trigger: 'a' }), ['b', 'c', 'd']);
         // trigger one after job "b"
         assert.deepEqual(getNextJobs(parallelWorkflow, { trigger: 'b' }), ['e']);
     });
@@ -101,20 +116,20 @@ describe('getNextJobs', () => {
         // trigger "foo" branch commit
         assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~commit:foo' }), ['b']);
         // trigger "foo-bar-dev" branch commit
-        assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~commit:foo-bar-dev' }),
-            ['c']);
+        assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~commit:foo-bar-dev' }), ['c']);
         // trigger "bar-foo-prod" branch commit
-        assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~commit:bar-foo-prod' }),
-            ['c', 'd']);
+        assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~commit:bar-foo-prod' }), ['c', 'd']);
         // trigger by a pull request on "foo" branch
-        assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~pr:foo', prNum: '123' }),
-            ['PR-123:e']);
+        assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~pr:foo', prNum: '123' }), ['PR-123:e']);
         // trigger by a pull request on "foo-bar-dev" branch
-        assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~pr:foo-bar-dev',
-            prNum: '123' }), ['PR-123:f']);
+        assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~pr:foo-bar-dev', prNum: '123' }), [
+            'PR-123:f'
+        ]);
         // trigger by a pull request on "bar-foo-prod" branch
-        assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~pr:bar-foo-prod',
-            prNum: '123' }), ['PR-123:f', 'PR-123:g']);
+        assert.deepEqual(getNextJobs(specificBranchWorkflow, { trigger: '~pr:bar-foo-prod', prNum: '123' }), [
+            'PR-123:f',
+            'PR-123:g'
+        ]);
     });
 
     it('should figure out what jobs start next with external workflow', () => {
@@ -124,18 +139,22 @@ describe('getNextJobs', () => {
                                           sd@555:external-level2    /
              \ ~sd@777:external-level1 -> ~sd@888:external-level2   /
         */
-        assert.deepEqual(getNextJobs(EXTERNAL_COMPLEX_WORKFLOW, { trigger: 'A' }),
-            ['B', 'sd@777:external-level1', 'sd@111:external-level1', 'sd@333:external-level1']);
-        assert.deepEqual(getNextJobs(EXTERNAL_COMPLEX_WORKFLOW,
-            { trigger: 'B' }), ['C']);
+        assert.deepEqual(getNextJobs(EXTERNAL_COMPLEX_WORKFLOW, { trigger: 'A' }), [
+            'B',
+            'sd@777:external-level1',
+            'sd@111:external-level1',
+            'sd@333:external-level1'
+        ]);
+        assert.deepEqual(getNextJobs(EXTERNAL_COMPLEX_WORKFLOW, { trigger: 'B' }), ['C']);
     });
 
     it('should not return external job on pr trigger', () => {
-        assert.deepEqual(getNextJobs(EXTERNAL_JOIN_WORKFLOW,
-            { trigger: '~pr', prNum: '1', chainPR: true }), ['PR-1:main']);
-        assert.deepEqual(getNextJobs(EXTERNAL_JOIN_WORKFLOW,
-            { trigger: 'PR-1:main', prNum: '1', chainPR: true }), ['PR-1:foo']);
-        assert.deepEqual(getNextJobs(EXTERNAL_JOIN_WORKFLOW,
-            { trigger: 'PR-1:foo', prNum: '1', chainPR: true }), []);
+        assert.deepEqual(getNextJobs(EXTERNAL_JOIN_WORKFLOW, { trigger: '~pr', prNum: '1', chainPR: true }), [
+            'PR-1:main'
+        ]);
+        assert.deepEqual(getNextJobs(EXTERNAL_JOIN_WORKFLOW, { trigger: 'PR-1:main', prNum: '1', chainPR: true }), [
+            'PR-1:foo'
+        ]);
+        assert.deepEqual(getNextJobs(EXTERNAL_JOIN_WORKFLOW, { trigger: 'PR-1:foo', prNum: '1', chainPR: true }), []);
     });
 });
