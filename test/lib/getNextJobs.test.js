@@ -140,10 +140,10 @@ describe('getNextJobs', () => {
              \ ~sd@777:external-level1 -> ~sd@888:external-level2   /
         */
         assert.deepEqual(getNextJobs(EXTERNAL_COMPLEX_WORKFLOW, { trigger: 'A' }), [
-            'B',
             'sd@777:external-level1',
             'sd@111:external-level1',
-            'sd@333:external-level1'
+            'sd@333:external-level1',
+            'B'
         ]);
         assert.deepEqual(getNextJobs(EXTERNAL_COMPLEX_WORKFLOW, { trigger: 'B' }), ['C']);
     });
