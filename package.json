@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:screwdriver-cd/workflow-parser.git"
+    "url": "git+https://github.com/screwdriver-cd/workflow-parser.git"
   },
   "homepage": "https://github.com/screwdriver-cd/workflow-parser",
   "bugs": "https://github.com/screwdriver-cd/screwdriver/issues",
@@ -49,6 +49,9 @@
     "screwdriver-data-schema": "^21.0.0"
   },
   "release": {
+    "branches": [
+      "master"
+    ],
     "debug": false
   }
 }
