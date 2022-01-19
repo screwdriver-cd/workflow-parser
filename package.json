@@ -49,9 +49,6 @@
     "screwdriver-data-schema": "^21.0.0"
   },
   "release": {
-    "debug": false,
-    "verifyConditions": {
-      "path": "./node_modules/semantic-release/src/lib/plugin-noop.js"
-    }
+    "debug": false
   }
 }
