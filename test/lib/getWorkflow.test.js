@@ -21,16 +21,21 @@ describe('getWorkflow', () => {
 
     it('should throw if it is not given correct input', async () => {
         try {
-            await getWorkflow({ config: {} }, triggerFactoryMock);
+            const pipelineConfig = { config: {} };
+
+            await getWorkflow({ pipelineConfig, triggerFactory: triggerFactoryMock });
         } catch (e) {
             assert.equal(e.message, 'No Job config provided');
         }
     });
 
     it('should convert a config with job-requires workflow to directed graph', async () => {
-        const requires = await getWorkflow(REQUIRES_WORKFLOW, triggerFactoryMock);
-        const legacyRequires = await getWorkflow(LEGACY_AND_REQUIRES_WORKFLOW, triggerFactoryMock);
-        const external = await getWorkflow(EXTERNAL_TRIGGER, triggerFactoryMock);
+        const requires = await getWorkflow({ pipelineConfig: REQUIRES_WORKFLOW, triggerFactory: triggerFactoryMock });
+        const legacyRequires = await getWorkflow({
+            pipelineConfig: LEGACY_AND_REQUIRES_WORKFLOW,
+            triggerFactory: triggerFactoryMock
+        });
+        const external = await getWorkflow({ pipelineConfig: EXTERNAL_TRIGGER, triggerFactory: triggerFactoryMock });
 
         assert.deepEqual(requires, EXPECTED_OUTPUT);
         assert.deepEqual(legacyRequires, EXPECTED_OUTPUT);
@@ -38,19 +43,20 @@ describe('getWorkflow', () => {
     });
 
     it('should handle displayName', async () => {
-        const result = await getWorkflow(
-            {
-                jobs: {
-                    foo: {
-                        annotations: {
-                            'screwdriver.cd/displayName': 'baz'
-                        }
-                    },
-                    bar: {}
-                }
-            },
-            triggerFactoryMock
-        );
+        const pipelineConfig = {
+            jobs: {
+                foo: {
+                    annotations: {
+                        'screwdriver.cd/displayName': 'baz'
+                    }
+                },
+                bar: {}
+            }
+        };
+        const result = await getWorkflow({
+            pipelineConfig,
+            triggerFactory: triggerFactoryMock
+        });
 
         assert.deepEqual(result, {
             nodes: [{ name: '~pr' }, { name: '~commit' }, { name: 'foo', displayName: 'baz' }, { name: 'bar' }],
@@ -58,16 +64,17 @@ describe('getWorkflow', () => {
         });
     });
 
-    it('should handle detatched jobs', async () => {
-        const result = await getWorkflow(
-            {
-                jobs: {
-                    foo: {},
-                    bar: { requires: ['foo'] }
-                }
-            },
-            triggerFactoryMock
-        );
+    it('should handle detached jobs', async () => {
+        const pipelineConfig = {
+            jobs: {
+                foo: {},
+                bar: { requires: ['foo'] }
+            }
+        };
+        const result = await getWorkflow({
+            pipelineConfig,
+            triggerFactory: triggerFactoryMock
+        });
 
         assert.deepEqual(result, {
             nodes: [{ name: '~pr' }, { name: '~commit' }, { name: 'foo' }, { name: 'bar' }],
@@ -75,18 +82,84 @@ describe('getWorkflow', () => {
         });
     });
 
-    it('should handle logical OR requires', async () => {
-        const result = await getWorkflow(
-            {
-                jobs: {
-                    foo: { requires: ['~commit'] },
-                    A: { requires: ['foo'] },
-                    B: { requires: ['foo'] },
-                    C: { requires: ['~A', '~B', '~sd@1234:foo'] }
-                }
+    it('should handle stage requires', async () => {
+        const pipelineConfig = {
+            jobs: {
+                foo: { requires: ['~commit'] },
+                A: { requires: ['foo'] },
+                B: { requires: ['foo', '~stage@other:teardown'] },
+                C: { requires: ['~stage@deploy:setup'], stage: { name: 'deploy', startFrom: true } },
+                D: { requires: ['~C'], stage: { name: 'deploy' } },
+                main: { requires: ['~stage@other:setup'], stage: { name: 'other', startFrom: true } },
+                publish: { requires: ['main'], stage: { name: 'other' } }
             },
-            triggerFactoryMock
-        );
+            stages: {
+                other: {
+                    setup: {},
+                    description: 'For canary deployment',
+                    jobs: ['main', 'publish'],
+                    startFrom: 'main'
+                },
+                deploy: {
+                    requires: ['A'],
+                    jobs: ['C', 'D']
+                }
+            }
+        };
+        const result = await getWorkflow({
+            pipelineConfig,
+            triggerFactory: triggerFactoryMock,
+            pipelineOnly: false
+        });
+
+        assert.deepEqual(result.workflow, {
+            nodes: [
+                { name: '~pr' },
+                { name: '~commit' },
+                { name: 'foo' },
+                { name: 'A' },
+                { name: 'B' },
+                { name: '~stage@other' },
+                { name: '~stage@deploy' }
+            ],
+            edges: [
+                { src: '~commit', dest: 'foo' },
+                { src: 'foo', dest: 'A' },
+                { src: 'stage@other', dest: 'B' },
+                { src: 'foo', dest: 'B' },
+                { src: 'A', dest: 'stage@deploy' }
+            ]
+        });
+        assert.deepEqual(result.stageWorkflows, {
+            other: {
+                nodes: [
+                    { name: 'stage@other:teardown' },
+                    { name: 'main' },
+                    { name: 'stage@other:setup' },
+                    { name: 'publish' }
+                ],
+                edges: [{ src: 'main', dest: 'publish' }]
+            },
+            deploy: {
+                nodes: [{ name: 'C' }, { name: 'stage@deploy:setup' }, { name: 'D' }],
+                edges: [{ src: 'C', dest: 'D' }]
+            }
+        });
+    });
+
+    it('should handle logical OR requires', async () => {
+        const pipelineConfig = {
+            jobs: {
+                foo: { requires: ['~commit'] },
+                A: { requires: ['foo'] },
+                B: { requires: ['foo'] },
+                C: { requires: ['~A', '~B', '~sd@1234:foo'] }
+            }
+        };
+        const result = await getWorkflow({
+            pipelineConfig,
+            triggerFactory: triggerFactoryMock
+        });
 
         assert.deepEqual(result, {
             nodes: [
@@ -109,20 +182,21 @@ describe('getWorkflow', () => {
         });
     });
 
-    it('should handle logical OR and logial AND requires', async () => {
-        const result = await getWorkflow(
-            {
-                jobs: {
-                    foo: { requires: ['~commit'] },
-                    A: { requires: ['foo'] },
-                    B: { requires: ['foo'] },
-                    C: { requires: ['~A', '~B', 'D', 'E'] },
-                    D: {},
-                    E: {}
-                }
-            },
-            triggerFactoryMock
-        );
+    it('should handle logical OR and logical AND requires', async () => {
+        const pipelineConfig = {
+            jobs: {
+                foo: { requires: ['~commit'] },
+                A: { requires: ['foo'] },
+                B: { requires: ['foo'] },
+                C: { requires: ['~A', '~B', 'D', 'E'] },
+                D: {},
+                E: {}
+            }
+        };
+        const result = await getWorkflow({
+            pipelineConfig,
+            triggerFactory: triggerFactoryMock
+        });
 
         assert.deepEqual(result, {
             nodes: [
@@ -148,15 +222,16 @@ describe('getWorkflow', () => {
     });
 
     it('should dedupe requires', async () => {
-        const result = await getWorkflow(
-            {
-                jobs: {
-                    foo: { requires: ['A', 'A', 'A'] },
-                    A: {}
-                }
-            },
-            triggerFactoryMock
-        );
+        const pipelineConfig = {
+            jobs: {
+                foo: { requires: ['A', 'A', 'A'] },
+                A: {}
+            }
+        };
+        const result = await getWorkflow({
+            pipelineConfig,
+            triggerFactory: triggerFactoryMock
+        });
 
         assert.deepEqual(result, {
             nodes: [{ name: '~pr' }, { name: '~commit' }, { name: 'foo' }, { name: 'A' }],
@@ -165,17 +240,18 @@ describe('getWorkflow', () => {
     });
 
     it('should handle joins', async () => {
-        const result = await getWorkflow(
-            {
-                jobs: {
-                    foo: {},
-                    bar: { requires: ['foo'] },
-                    baz: { requires: ['foo'] },
-                    bax: { requires: ['bar', 'baz'] }
-                }
-            },
-            triggerFactoryMock
-        );
+        const pipelineConfig = {
+            jobs: {
+                foo: {},
+                bar: { requires: ['foo'] },
+                baz: { requires: ['foo'] },
+                bax: { requires: ['bar', 'baz'] }
+            }
+        };
+        const result = await getWorkflow({
+            pipelineConfig,
+            triggerFactory: triggerFactoryMock
+        });
 
         assert.deepEqual(result, {
             nodes: [
@@ -197,17 +273,18 @@ describe('getWorkflow', () => {
 
     it('should remove ~ for downstream external trigger', async () => {
         triggerFactoryMock.getDestFromSrc.withArgs('sd@123:foo').resolves(['sd@111:baz', 'sd@1234:foo']);
-        const result = await getWorkflow(
-            {
-                jobs: {
-                    main: { requires: ['~pr', '~commit'] },
-                    foo: { requires: ['main'] },
-                    bar: { requires: ['sd@111:baz', 'sd@1234:foo'] }
-                }
-            },
-            triggerFactoryMock,
-            123
-        );
+        const pipelineConfig = {
+            jobs: {
+                main: { requires: ['~pr', '~commit'] },
+                foo: { requires: ['main'] },
+                bar: { requires: ['sd@111:baz', 'sd@1234:foo'] }
+            }
+        };
+        const result = await getWorkflow({
+            pipelineConfig,
+            triggerFactory: triggerFactoryMock,
+            pipelineId: 123
+        });
 
         assert.deepEqual(result, EXPECTED_EXTERNAL_JOIN);
     });
@@ -230,25 +307,26 @@ describe('getWorkflow', () => {
         triggerFactoryMock.getDestFromSrc.withArgs('sd@555:external-level2').resolves(['sd@666:external-level3']);
         triggerFactoryMock.getDestFromSrc.withArgs('~sd@777:external-level1').resolves(['~sd@888:external-level2']);
 
-        const result = await getWorkflow(
-            {
-                jobs: {
-                    A: {},
-                    B: { requires: ['A'] },
-                    C: {
-                        requires: [
-                            'B',
-                            'sd@222:external-level2',
-                            'sd@444:external-level2',
-                            'sd@555:external-level2',
-                            '~sd@888:external-level2'
-                        ]
-                    }
+        const pipelineConfig = {
+            jobs: {
+                A: {},
+                B: { requires: ['A'] },
+                C: {
+                    requires: [
+                        'B',
+                        'sd@222:external-level2',
+                        'sd@444:external-level2',
+                        'sd@555:external-level2',
+                        '~sd@888:external-level2'
+                    ]
                 }
-            },
-            triggerFactoryMock,
-            123
-        );
+            }
+        };
+        const result = await getWorkflow({
+            pipelineConfig,
+            triggerFactory: triggerFactoryMock,
+            pipelineId: 123
+        });
 
         assert.deepEqual(result, EXPECTED_EXTERNAL_COMPLEX);
     });
