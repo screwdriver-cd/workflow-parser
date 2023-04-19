@@ -87,10 +87,10 @@ describe('getWorkflow', () => {
             jobs: {
                 foo: { requires: ['~commit'] },
                 A: { requires: ['foo'] },
-                B: { requires: ['foo', '~stage@other:teardown'] },
-                C: { requires: ['~stage@deploy:setup'], stage: { name: 'deploy', startFrom: true } },
+                B: { requires: ['foo', 'stage@other:teardown'] },
+                C: { requires: ['stage@deploy:setup'], stage: { name: 'deploy', startFrom: true } },
                 D: { requires: ['~C'], stage: { name: 'deploy' } },
-                main: { requires: ['~stage@other:setup'], stage: { name: 'other', startFrom: true } },
+                main: { requires: ['stage@other:setup'], stage: { name: 'other', startFrom: true } },
                 publish: { requires: ['main'], stage: { name: 'other' } }
             },
             stages: {
