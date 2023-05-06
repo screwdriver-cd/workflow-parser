@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "@hapi/hoek": "^10.0.1",
+    "clone": "^2.1.2",
     "screwdriver-data-schema": "^22.0.1"
   },
   "release": {

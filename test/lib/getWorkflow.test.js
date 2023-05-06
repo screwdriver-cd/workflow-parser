@@ -90,6 +90,7 @@ describe('getWorkflow', () => {
                 B: { requires: ['foo', 'stage@other:teardown'] },
                 C: { requires: ['stage@deploy:setup'], stage: { name: 'deploy', startFrom: true } },
                 D: { requires: ['~C'], stage: { name: 'deploy' } },
+                E: { requires: ['stage@test:setup'], stage: { name: 'test', startFrom: true } },
                 main: { requires: ['stage@other:setup'], stage: { name: 'other', startFrom: true } },
                 publish: { requires: ['main'], stage: { name: 'other' } }
             },
@@ -103,6 +104,10 @@ describe('getWorkflow', () => {
                 deploy: {
                     requires: ['A'],
                     jobs: ['C', 'D']
+                },
+                test: {
+                    requires: 'foo',
+                    jobs: ['E']
                 }
             }
         };
@@ -120,14 +125,16 @@ describe('getWorkflow', () => {
                 { name: 'A' },
                 { name: 'B' },
                 { name: '~stage@other' },
-                { name: '~stage@deploy' }
+                { name: '~stage@deploy' },
+                { name: '~stage@test' }
             ],
             edges: [
                 { src: '~commit', dest: 'foo' },
                 { src: 'foo', dest: 'A' },
                 { src: 'stage@other', dest: 'B' },
                 { src: 'foo', dest: 'B' },
-                { src: 'A', dest: 'stage@deploy' }
+                { src: 'A', dest: 'stage@deploy' },
+                { src: 'foo', dest: 'stage@test' }
             ]
         });
         assert.deepEqual(result.stageWorkflows, {
@@ -138,11 +145,26 @@ describe('getWorkflow', () => {
                     { name: 'stage@other:setup' },
                     { name: 'publish' }
                 ],
-                edges: [{ src: 'main', dest: 'publish' }]
+                edges: [
+                    { src: 'stage@other:setup', dest: 'main' },
+                    { src: 'main', dest: 'publish' }
+                ]
             },
             deploy: {
-                nodes: [{ name: 'C' }, { name: 'stage@deploy:setup' }, { name: 'D' }],
-                edges: [{ src: 'C', dest: 'D' }]
+                nodes: [
+                    { name: 'C' },
+                    { name: 'stage@deploy:setup' },
+                    { name: 'D' },
+                    { name: 'stage@deploy:teardown' }
+                ],
+                edges: [
+                    { src: 'stage@deploy:setup', dest: 'C' },
+                    { src: 'C', dest: 'D' }
+                ]
+            },
+            test: {
+                nodes: [{ name: 'E' }, { name: 'stage@test:setup' }, { name: 'stage@test:teardown' }],
+                edges: [{ src: 'stage@test:setup', dest: 'E' }]
             }
         });
     });
