@@ -10,7 +10,7 @@ npm install screwdriver-workflow-parser
 ```
 
 ```
-const { getWorkflow, getNextJobs, getSrcForJoin, hasCycle, hasJoin } = require('screwdriver-workflow-parser');
+const { getWorkflow, getNextJobs, getSrcForJoin, getFlattenedWorkflow, hasCycle, hasJoin } = require('screwdriver-workflow-parser');
 
 // Calculate the directed graph workflow from a pipeline config (and parse legacy workflows)
 const workflowGraph = getWorkflow({ pipelineConfig, triggerFactory });
@@ -30,6 +30,26 @@ const prJobsToTrigger = getNextJobs(workflowGraph, { trigger: '~pr', prNum: 123 
 
 // Return the join src jobs given a workflowGraph and dest job
 const srcArray = getSrcForJoin(workflowGraph, { jobName: 'foo' });
+
+// Return the flattened workflowGraph given a workflowGraph and stage workflowGraphs
+const flattenedWorkflow = getFlattenedWorkflow(workflowGraph, {
+    deploy: {
+        nodes: [
+            { name: 'C' },
+            { name: 'stage@deploy:setup' },
+            { name: 'D' },
+            { name: 'stage@deploy:teardown' }
+        ],
+        edges: [
+            { src: 'stage@deploy:setup', dest: 'C' },
+            { src: 'C', dest: 'D' }
+        ]
+    },
+    test: {
+        nodes: [{ name: 'E' }, { name: 'stage@test:setup' }, { name: 'stage@test:teardown' }],
+        edges: [{ src: 'stage@test:setup', dest: 'E' }]
+    }
+});
 
 // Check to see if a given workflow graph has a loop in it. A -> B -> A
 if (hasCycle(workflowGraph)) {
