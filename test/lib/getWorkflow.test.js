@@ -30,12 +30,18 @@ describe('getWorkflow', () => {
     });
 
     it('should convert a config with job-requires workflow to directed graph', async () => {
-        const requires = await getWorkflow({ pipelineConfig: REQUIRES_WORKFLOW, triggerFactory: triggerFactoryMock });
-        const legacyRequires = await getWorkflow({
+        const { pipelineWorkflow: requires } = await getWorkflow({
+            pipelineConfig: REQUIRES_WORKFLOW,
+            triggerFactory: triggerFactoryMock
+        });
+        const { pipelineWorkflow: legacyRequires } = await getWorkflow({
             pipelineConfig: LEGACY_AND_REQUIRES_WORKFLOW,
             triggerFactory: triggerFactoryMock
         });
-        const external = await getWorkflow({ pipelineConfig: EXTERNAL_TRIGGER, triggerFactory: triggerFactoryMock });
+        const { pipelineWorkflow: external } = await getWorkflow({
+            pipelineConfig: EXTERNAL_TRIGGER,
+            triggerFactory: triggerFactoryMock
+        });
 
         assert.deepEqual(requires, EXPECTED_OUTPUT);
         assert.deepEqual(legacyRequires, EXPECTED_OUTPUT);
@@ -53,7 +59,7 @@ describe('getWorkflow', () => {
                 bar: {}
             }
         };
-        const result = await getWorkflow({
+        const { pipelineWorkflow: result } = await getWorkflow({
             pipelineConfig,
             triggerFactory: triggerFactoryMock
         });
@@ -71,7 +77,7 @@ describe('getWorkflow', () => {
                 bar: { requires: ['foo'] }
             }
         };
-        const result = await getWorkflow({
+        const { pipelineWorkflow: result } = await getWorkflow({
             pipelineConfig,
             triggerFactory: triggerFactoryMock
         });
@@ -89,7 +95,7 @@ describe('getWorkflow', () => {
                 A: { requires: ['foo'] },
                 B: { requires: ['foo', 'stage@other:teardown'] },
                 C: { requires: ['stage@deploy:setup'], stage: { name: 'deploy', startFrom: true } },
-                D: { requires: ['~C'], stage: { name: 'deploy' } },
+                D: { requires: ['C'], stage: { name: 'deploy' } },
                 E: { requires: ['stage@test:setup'], stage: { name: 'test', startFrom: true } },
                 main: { requires: ['stage@other:setup'], stage: { name: 'other', startFrom: true } },
                 publish: { requires: ['main'], stage: { name: 'other' } }
@@ -117,7 +123,7 @@ describe('getWorkflow', () => {
             pipelineOnly: false
         });
 
-        assert.deepEqual(result.workflow, {
+        assert.deepEqual(result.pipelineWorkflow, {
             nodes: [
                 { name: '~pr' },
                 { name: '~commit' },
@@ -131,8 +137,8 @@ describe('getWorkflow', () => {
             edges: [
                 { src: '~commit', dest: 'foo' },
                 { src: 'foo', dest: 'A' },
-                { src: 'stage@other', dest: 'B' },
-                { src: 'foo', dest: 'B' },
+                { src: 'foo', dest: 'B', join: true },
+                { src: 'stage@other', dest: 'B', join: true },
                 { src: 'A', dest: 'stage@deploy' },
                 { src: 'foo', dest: 'stage@test' }
             ]
@@ -178,7 +184,7 @@ describe('getWorkflow', () => {
                 C: { requires: ['~A', '~B', '~sd@1234:foo'] }
             }
         };
-        const result = await getWorkflow({
+        const { pipelineWorkflow: result } = await getWorkflow({
             pipelineConfig,
             triggerFactory: triggerFactoryMock
         });
@@ -215,7 +221,7 @@ describe('getWorkflow', () => {
                 E: {}
             }
         };
-        const result = await getWorkflow({
+        const { pipelineWorkflow: result } = await getWorkflow({
             pipelineConfig,
             triggerFactory: triggerFactoryMock
         });
@@ -250,7 +256,7 @@ describe('getWorkflow', () => {
                 A: {}
             }
         };
-        const result = await getWorkflow({
+        const { pipelineWorkflow: result } = await getWorkflow({
             pipelineConfig,
             triggerFactory: triggerFactoryMock
         });
@@ -270,7 +276,7 @@ describe('getWorkflow', () => {
                 bax: { requires: ['bar', 'baz'] }
             }
         };
-        const result = await getWorkflow({
+        const { pipelineWorkflow: result } = await getWorkflow({
             pipelineConfig,
             triggerFactory: triggerFactoryMock
         });
@@ -302,7 +308,7 @@ describe('getWorkflow', () => {
                 bar: { requires: ['sd@111:baz', 'sd@1234:foo'] }
             }
         };
-        const result = await getWorkflow({
+        const { pipelineWorkflow: result } = await getWorkflow({
             pipelineConfig,
             triggerFactory: triggerFactoryMock,
             pipelineId: 123
@@ -344,7 +350,7 @@ describe('getWorkflow', () => {
                 }
             }
         };
-        const result = await getWorkflow({
+        const { pipelineWorkflow: result } = await getWorkflow({
             pipelineConfig,
             triggerFactory: triggerFactoryMock,
             pipelineId: 123
