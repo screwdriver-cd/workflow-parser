@@ -98,7 +98,13 @@ describe('getWorkflow', () => {
                 D: { requires: ['C'], stage: { name: 'deploy' } },
                 E: { requires: ['stage@test:setup'], stage: { name: 'test', startFrom: true } },
                 main: { requires: ['stage@other:setup'], stage: { name: 'other', startFrom: true } },
-                publish: { requires: ['main'], stage: { name: 'other' } }
+                publish: { requires: ['main'], stage: { name: 'other' } },
+                'stage@other:setup': { stage: { name: 'other' } },
+                'stage@other:teardown': { stage: { name: 'other' } },
+                'stage@deploy:setup': { stage: { name: 'deploy' } },
+                'stage@deploy:teardown': { stage: { name: 'deploy' } },
+                'stage@test:setup': { stage: { name: 'test' } },
+                'stage@test:teardown': { stage: { name: 'test' } }
             },
             stages: {
                 other: {
