@@ -252,4 +252,98 @@ describe('getWorkflow', () => {
 
         assert.deepEqual(result, EXPECTED_EXTERNAL_COMPLEX);
     });
+
+    it('should handle stages', async () => {
+        const result = await getWorkflow(
+            {
+                jobs: {
+                    'stage@alpha:setup': { requires: ['~commit'], stage: { name: 'alpha' } },
+                    'alpha-deploy': { requires: ['stage@alpha:setup'], stage: { name: 'alpha' } },
+                    'alpha-test': { requires: ['alpha-deploy'], stage: { name: 'alpha' } },
+                    'alpha-certify': { requires: ['alpha-test'], stage: { name: 'alpha' } },
+                    'stage@alpha:teardown': { requires: ['alpha-certify'], stage: { name: 'alpha' } },
+                    'stage@beta:setup': { requires: ['~stage@alpha:teardown'], stage: { name: 'beta' } },
+                    'beta-deploy': { requires: ['~stage@beta:setup'], stage: { name: 'beta' } },
+                    'beta-test': { requires: ['~beta-deploy'], stage: { name: 'beta' } },
+                    'beta-certify': { requires: ['~beta-test'], stage: { name: 'beta' } },
+                    'stage@beta:teardown': { requires: ['~beta-certify'], stage: { name: 'beta' } },
+                    'stage@gamma:setup': { requires: ['triggering-a-stage'], stage: { name: 'gamma' } },
+                    'gamma-deploy': { requires: ['stage@gamma:setup'], stage: { name: 'gamma' } },
+                    'gamma-test-integration': { requires: ['gamma-deploy'], stage: { name: 'gamma' } },
+                    'gamma-test-functional': { requires: ['gamma-deploy'], stage: { name: 'gamma' } },
+                    'gamma-certify': {
+                        requires: ['gamma-test-integration', 'gamma-test-functional'],
+                        stage: { name: 'gamma' }
+                    },
+                    'stage@gamma:teardown': { requires: ['gamma-certify'], stage: { name: 'gamma' } },
+                    'triggering-a-stage': { requires: ['~commit'] },
+                    'triggered-by-a-stage-job': { requires: ['gamma-test-integration'] },
+                    'triggered-after-a-stage': { requires: ['stage@gamma:teardown'] }
+                },
+                stages: {
+                    alpha: {
+                        description: 'stage for alpha environment',
+                        jobs: ['alpha-deploy', 'alpha-test', 'alpha-certify']
+                    },
+                    beta: {
+                        description: 'stage for beta environment',
+                        jobs: ['beta-deploy', 'beta-test', 'beta-certify']
+                    },
+                    gamma: {
+                        description: 'stage for gamma environment',
+                        jobs: ['gamma-deploy', 'gamma-test-integration', 'gamma-test-functional', 'gamma-certify']
+                    }
+                }
+            },
+            triggerFactoryMock
+        );
+
+        assert.deepEqual(result, {
+            nodes: [
+                { name: '~pr' },
+                { name: '~commit' },
+                { name: 'stage@alpha:setup', stageName: 'alpha' },
+                { name: 'alpha-deploy', stageName: 'alpha' },
+                { name: 'alpha-test', stageName: 'alpha' },
+                { name: 'alpha-certify', stageName: 'alpha' },
+                { name: 'stage@alpha:teardown', stageName: 'alpha' },
+                { name: 'stage@beta:setup', stageName: 'beta' },
+                { name: 'beta-deploy', stageName: 'beta' },
+                { name: 'beta-test', stageName: 'beta' },
+                { name: 'beta-certify', stageName: 'beta' },
+                { name: 'stage@beta:teardown', stageName: 'beta' },
+                { name: 'stage@gamma:setup', stageName: 'gamma' },
+                { name: 'triggering-a-stage' },
+                { name: 'gamma-deploy', stageName: 'gamma' },
+                { name: 'gamma-test-integration', stageName: 'gamma' },
+                { name: 'gamma-test-functional', stageName: 'gamma' },
+                { name: 'gamma-certify', stageName: 'gamma' },
+                { name: 'stage@gamma:teardown', stageName: 'gamma' },
+                { name: 'triggered-by-a-stage-job' },
+                { name: 'triggered-after-a-stage' }
+            ],
+            edges: [
+                { src: '~commit', dest: 'stage@alpha:setup' },
+                { src: 'stage@alpha:setup', dest: 'alpha-deploy' },
+                { src: 'alpha-deploy', dest: 'alpha-test' },
+                { src: 'alpha-test', dest: 'alpha-certify' },
+                { src: 'alpha-certify', dest: 'stage@alpha:teardown' },
+                { src: 'stage@alpha:teardown', dest: 'stage@beta:setup' },
+                { src: 'stage@beta:setup', dest: 'beta-deploy' },
+                { src: 'beta-deploy', dest: 'beta-test' },
+                { src: 'beta-test', dest: 'beta-certify' },
+                { src: 'beta-certify', dest: 'stage@beta:teardown' },
+                { src: 'triggering-a-stage', dest: 'stage@gamma:setup' },
+                { src: 'stage@gamma:setup', dest: 'gamma-deploy' },
+                { src: 'gamma-deploy', dest: 'gamma-test-integration' },
+                { src: 'gamma-deploy', dest: 'gamma-test-functional' },
+                { src: 'gamma-test-integration', dest: 'gamma-certify', join: true },
+                { src: 'gamma-test-functional', dest: 'gamma-certify', join: true },
+                { src: 'gamma-certify', dest: 'stage@gamma:teardown' },
+                { src: '~commit', dest: 'triggering-a-stage' },
+                { src: 'gamma-test-integration', dest: 'triggered-by-a-stage-job' },
+                { src: 'stage@gamma:teardown', dest: 'triggered-after-a-stage' }
+            ]
+        });
+    });
 });
