@@ -18,7 +18,7 @@
         { "src": "A", "dest": "sd@777:external-level1" },
         { "src": "A", "dest": "sd@111:external-level1" },
         { "src": "A", "dest": "sd@333:external-level1" },
-        { "src": "A", "dest": "B" },
+        { "src": "A", "dest": "B", "join": true },
         { "src": "~sd@888:external-level2", "dest": "C" },
         { "src": "B", "dest": "C", "join": true },
         { "src": "sd@222:external-level2", "dest": "C", "join": true },
