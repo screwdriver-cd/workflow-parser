@@ -71,7 +71,7 @@ describe('getWorkflow', () => {
 
         assert.deepEqual(result, {
             nodes: [{ name: '~pr' }, { name: '~commit' }, { name: 'foo' }, { name: 'bar' }],
-            edges: [{ src: 'foo', dest: 'bar', join: true }]
+            edges: [{ src: 'foo', dest: 'bar' }]
         });
     });
 
@@ -100,8 +100,8 @@ describe('getWorkflow', () => {
             ],
             edges: [
                 { src: '~commit', dest: 'foo' },
-                { src: 'foo', dest: 'A', join: true },
-                { src: 'foo', dest: 'B', join: true },
+                { src: 'foo', dest: 'A' },
+                { src: 'foo', dest: 'B' },
                 { src: 'A', dest: 'C' },
                 { src: 'B', dest: 'C' },
                 { src: '~sd@1234:foo', dest: 'C' }
@@ -137,8 +137,8 @@ describe('getWorkflow', () => {
             ],
             edges: [
                 { src: '~commit', dest: 'foo' },
-                { src: 'foo', dest: 'A', join: true },
-                { src: 'foo', dest: 'B', join: true },
+                { src: 'foo', dest: 'A' },
+                { src: 'foo', dest: 'B' },
                 { src: 'A', dest: 'C' },
                 { src: 'B', dest: 'C' },
                 { src: 'D', dest: 'C', join: true },
@@ -160,7 +160,7 @@ describe('getWorkflow', () => {
 
         assert.deepEqual(result, {
             nodes: [{ name: '~pr' }, { name: '~commit' }, { name: 'foo' }, { name: 'A' }],
-            edges: [{ src: 'A', dest: 'foo', join: true }]
+            edges: [{ src: 'A', dest: 'foo' }]
         });
     });
 
@@ -187,8 +187,8 @@ describe('getWorkflow', () => {
                 { name: 'bax' }
             ],
             edges: [
-                { src: 'foo', dest: 'bar', join: true },
-                { src: 'foo', dest: 'baz', join: true },
+                { src: 'foo', dest: 'bar' },
+                { src: 'foo', dest: 'baz' },
                 { src: 'bar', dest: 'bax', join: true },
                 { src: 'baz', dest: 'bax', join: true }
             ]
@@ -324,25 +324,25 @@ describe('getWorkflow', () => {
             ],
             edges: [
                 { src: '~commit', dest: 'stage@alpha:setup' },
-                { src: 'stage@alpha:setup', dest: 'alpha-deploy', join: true },
-                { src: 'alpha-deploy', dest: 'alpha-test', join: true },
-                { src: 'alpha-test', dest: 'alpha-certify', join: true },
-                { src: 'alpha-certify', dest: 'stage@alpha:teardown', join: true },
+                { src: 'stage@alpha:setup', dest: 'alpha-deploy' },
+                { src: 'alpha-deploy', dest: 'alpha-test' },
+                { src: 'alpha-test', dest: 'alpha-certify' },
+                { src: 'alpha-certify', dest: 'stage@alpha:teardown' },
                 { src: 'stage@alpha:teardown', dest: 'stage@beta:setup' },
                 { src: 'stage@beta:setup', dest: 'beta-deploy' },
                 { src: 'beta-deploy', dest: 'beta-test' },
                 { src: 'beta-test', dest: 'beta-certify' },
                 { src: 'beta-certify', dest: 'stage@beta:teardown' },
-                { src: 'triggering-a-stage', dest: 'stage@gamma:setup', join: true },
-                { src: 'stage@gamma:setup', dest: 'gamma-deploy', join: true },
-                { src: 'gamma-deploy', dest: 'gamma-test-integration', join: true },
-                { src: 'gamma-deploy', dest: 'gamma-test-functional', join: true },
+                { src: 'triggering-a-stage', dest: 'stage@gamma:setup' },
+                { src: 'stage@gamma:setup', dest: 'gamma-deploy' },
+                { src: 'gamma-deploy', dest: 'gamma-test-integration' },
+                { src: 'gamma-deploy', dest: 'gamma-test-functional' },
                 { src: 'gamma-test-integration', dest: 'gamma-certify', join: true },
                 { src: 'gamma-test-functional', dest: 'gamma-certify', join: true },
-                { src: 'gamma-certify', dest: 'stage@gamma:teardown', join: true },
+                { src: 'gamma-certify', dest: 'stage@gamma:teardown' },
                 { src: '~commit', dest: 'triggering-a-stage' },
-                { src: 'gamma-test-integration', dest: 'triggered-by-a-stage-job', join: true },
-                { src: 'stage@gamma:teardown', dest: 'triggered-after-a-stage', join: true }
+                { src: 'gamma-test-integration', dest: 'triggered-by-a-stage-job' },
+                { src: 'stage@gamma:teardown', dest: 'triggered-after-a-stage' }
             ]
         });
     });
