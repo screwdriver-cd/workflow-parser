@@ -13,7 +13,7 @@
     "edges": [
         { "src": "~pr", "dest": "main" },
         { "src": "~commit", "dest": "main" },
-        { "src": "main", "dest": "foo" },
+        { "src": "main", "dest": "foo", "join": true },
         { "src": "foo", "dest": "bar" },
         { "src": "promote", "dest": "bar" },
         { "src": "~release", "dest": "baz" },
