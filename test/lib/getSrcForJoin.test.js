@@ -43,7 +43,7 @@ describe('getSrcForJoin', () => {
     it('should figure out what src for the job for a complex workflow', () => {
         // src nodes for join job
         assert.deepEqual(getSrcForJoin(EXTERNAL_COMPLEX_WORKFLOW, { jobName: 'A' }), []);
-        assert.deepEqual(getSrcForJoin(EXTERNAL_COMPLEX_WORKFLOW, { jobName: 'B' }), []);
+        assert.deepEqual(getSrcForJoin(EXTERNAL_COMPLEX_WORKFLOW, { jobName: 'B' }), [{ name: 'A' }]);
         assert.deepEqual(getSrcForJoin(EXTERNAL_COMPLEX_WORKFLOW, { jobName: 'C' }), [
             { name: 'B' },
             { name: 'sd@222:external-level2' },

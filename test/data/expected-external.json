@@ -11,7 +11,7 @@
     "edges": [
         { "src": "~pr", "dest": "main" },
         { "src": "~commit", "dest": "main" },
-        { "src": "main", "dest": "foo" },
+        { "src": "main", "dest": "foo", "join": true },
         { "src": "~sd@1234:foo", "dest": "bar" },
         { "src": "foo", "dest": "bar", "join": true },
         { "src": "sd@111:baz", "dest": "bar", "join": true }
