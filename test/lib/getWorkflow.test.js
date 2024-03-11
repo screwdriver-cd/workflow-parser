@@ -256,11 +256,19 @@ describe('getWorkflow', () => {
     describe('should handle stages', async () => {
         const PIPELINE_CONFIG = {
             jobs: {
-                'stage@alpha:setup': { requires: ['~commit'], stage: { name: 'alpha' } },
+                'stage@alpha:setup': {
+                    requires: ['~commit'],
+                    stage: { name: 'alpha' },
+                    annotations: { 'screwdriver.cd/virtualJob': true }
+                },
                 'alpha-deploy': { requires: ['stage@alpha:setup'], stage: { name: 'alpha' } },
                 'alpha-test': { requires: ['alpha-deploy'], stage: { name: 'alpha' } },
                 'alpha-certify': { requires: ['alpha-test'], stage: { name: 'alpha' } },
-                'stage@alpha:teardown': { requires: ['alpha-certify'], stage: { name: 'alpha' } },
+                'stage@alpha:teardown': {
+                    requires: ['alpha-certify'],
+                    stage: { name: 'alpha' },
+                    annotations: { 'screwdriver.cd/virtualJob': true }
+                },
                 'stage@beta:setup': { requires: ['~stage@alpha:teardown'], stage: { name: 'beta' } },
                 'beta-deploy': { requires: ['~stage@beta:setup'], stage: { name: 'beta' } },
                 'beta-test': { requires: ['~beta-deploy'], stage: { name: 'beta' } },
@@ -299,11 +307,11 @@ describe('getWorkflow', () => {
             nodes: [
                 { name: '~pr' },
                 { name: '~commit' },
-                { name: 'stage@alpha:setup', stageName: 'alpha' },
+                { name: 'stage@alpha:setup', stageName: 'alpha', virtual: true },
                 { name: 'alpha-deploy', stageName: 'alpha' },
                 { name: 'alpha-test', stageName: 'alpha' },
                 { name: 'alpha-certify', stageName: 'alpha' },
-                { name: 'stage@alpha:teardown', stageName: 'alpha' },
+                { name: 'stage@alpha:teardown', stageName: 'alpha', virtual: true },
                 { name: 'stage@beta:setup', stageName: 'beta' },
                 { name: 'beta-deploy', stageName: 'beta' },
                 { name: 'beta-test', stageName: 'beta' },
