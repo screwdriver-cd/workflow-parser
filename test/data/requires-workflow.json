@@ -4,6 +4,12 @@
         "foo": { "requires": ["main"] },
         "bar": { "requires": ["~foo", "~promote"] },
         "promote": { "requires": [] },
-        "baz": { "requires": ["~release", "~tag"] }
+        "baz": { "requires": ["~release", "~tag"] },
+
+        "stage@integration:setup": { "requires": ["~baz"], "stage": { "name": "integration" } },
+        "ci-deploy": { "requires": ["~stage@integration:setup"], "stage": { "name": "integration" } },
+        "ci-test": { "requires": ["~ci-deploy"], "stage": { "name": "integration" } },
+        "ci-certify": { "requires": ["~ci-test"], "stage": { "name": "integration" } },
+        "stage@integration:teardown": { "requires": ["~ci-certify"], "stage": { "name": "integration" } }
     }
 }
