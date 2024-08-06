@@ -20,14 +20,22 @@ describe('getNextJobs', () => {
         );
     });
 
-    it('should figure out what jobs start next', () => {
-        // trigger for a stage setup with the startFrom as a stage setup
+    it.only('should figure out what jobs start next', () => {
+        // trigger for a stage setup with the startFrom as a stage setup job
         assert.deepEqual(
             getNextJobs(WORKFLOW, {
                 trigger: 'stage@integration:setup',
                 startFrom: 'ci-test'
             }),
             ['ci-test']
+        );
+        // trigger for a stage setup with the startFrom as a stage
+        assert.deepEqual(
+            getNextJobs(WORKFLOW, {
+                trigger: 'stage@integration:setup',
+                startFrom: 'stage@integration'
+            }),
+            ['ci-deploy']
         );
         // trigger for a pr event
         assert.deepEqual(
