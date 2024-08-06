@@ -21,13 +21,45 @@ describe('getNextJobs', () => {
     });
 
     it('should figure out what jobs start next', () => {
-        // trigger for a stage setup with the startFrom as a stage setup
+        // trigger for a stage setup with the startFrom as a stage setup job
         assert.deepEqual(
             getNextJobs(WORKFLOW, {
                 trigger: 'stage@integration:setup',
                 startFrom: 'ci-test'
             }),
             ['ci-test']
+        );
+        // trigger for a stage setup with the startFrom as a stage
+        assert.deepEqual(
+            getNextJobs(WORKFLOW, {
+                trigger: 'stage@integration:setup',
+                startFrom: 'stage@integration'
+            }),
+            ['ci-deploy']
+        );
+        // trigger for a stage setup with the startFrom as the stage setup of same stage
+        assert.deepEqual(
+            getNextJobs(WORKFLOW, {
+                trigger: 'stage@integration:setup',
+                startFrom: 'stage@integration:setup'
+            }),
+            ['ci-deploy']
+        );
+        // trigger for a stage setup with the startFrom as the stage job in a different stage
+        assert.deepEqual(
+            getNextJobs(WORKFLOW, {
+                trigger: 'stage@integration:setup',
+                startFrom: 'a-test'
+            }),
+            ['ci-deploy']
+        );
+        // trigger for a stage setup with the startFrom as the stage setup of a different stage
+        assert.deepEqual(
+            getNextJobs(WORKFLOW, {
+                trigger: 'stage@integration:setup',
+                startFrom: 'stage@alpha:setup'
+            }),
+            ['ci-deploy']
         );
         // trigger for a pr event
         assert.deepEqual(

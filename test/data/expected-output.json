@@ -14,7 +14,13 @@
         { "name": "ci-deploy", "stageName":  "integration"},
         { "name": "ci-test", "stageName":  "integration"},
         { "name": "ci-certify", "stageName":  "integration"},
-        { "name": "stage@integration:teardown", "stageName":  "integration"}
+        { "name": "stage@integration:teardown", "stageName":  "integration"},
+
+        { "name": "stage@alpha:setup", "stageName":  "alpha"},
+        { "name": "a-deploy", "stageName":  "alpha"},
+        { "name": "a-test", "stageName":  "alpha"},
+        { "name": "a-certify", "stageName":  "alpha"},
+        { "name": "stage@alpha:teardown", "stageName":  "alpha"}
 
     ],
     "edges": [
@@ -30,6 +36,12 @@
         { "src": "stage@integration:setup", "dest": "ci-deploy" },
         { "src": "ci-deploy", "dest": "ci-test" },
         { "src": "ci-test", "dest": "ci-certify" },
-        { "src": "ci-certify", "dest": "stage@integration:teardown" }
+        { "src": "ci-certify", "dest": "stage@integration:teardown" },
+
+        { "src": "stage@integration:teardown", "dest": "stage@alpha:setup" },
+        { "src": "stage@alpha:setup", "dest": "a-deploy" },
+        { "src": "a-deploy", "dest": "a-test" },
+        { "src": "a-test", "dest": "a-certify" },
+        { "src": "a-certify", "dest": "stage@alpha:teardown" }
     ]
 }
