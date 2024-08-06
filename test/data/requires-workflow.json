@@ -10,6 +10,12 @@
         "ci-deploy": { "requires": ["~stage@integration:setup"], "stage": { "name": "integration" } },
         "ci-test": { "requires": ["~ci-deploy"], "stage": { "name": "integration" } },
         "ci-certify": { "requires": ["~ci-test"], "stage": { "name": "integration" } },
-        "stage@integration:teardown": { "requires": ["~ci-certify"], "stage": { "name": "integration" } }
+        "stage@integration:teardown": { "requires": ["~ci-certify"], "stage": { "name": "integration" } },
+
+        "stage@alpha:setup": { "requires": ["~stage@integration:teardown"], "stage": { "name": "alpha" } },
+        "a-deploy": { "requires": ["~stage@alpha:setup"], "stage": { "name": "alpha" } },
+        "a-test": { "requires": ["~a-deploy"], "stage": { "name": "alpha" } },
+        "a-certify": { "requires": ["~a-test"], "stage": { "name": "alpha" } },
+        "stage@alpha:teardown": { "requires": ["~a-certify"], "stage": { "name": "alpha" } }
     }
 }
