@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "@hapi/hoek": "^10.0.1",
-    "screwdriver-data-schema": "^23.1.0"
+    "screwdriver-data-schema": "^24.0.0"
   },
   "release": {
     "branches": [
