@@ -58,10 +58,13 @@ describe('isPR', () => {
 
     it('sholud return true if job name has PR prefix', () => {
         assert.isTrue(isPR('PR-1:testJobName'));
+        assert.isTrue(isPR('PR-1'));
     });
 
     it('sholud return false if job name does not have PR prefix', () => {
         assert.isFalse(isPR('testJobName'));
+        assert.isFalse(isPR('sd@123:component'));
+        assert.isFalse(isPR('stage@sandbox:teardown'));
     });
 });
 
