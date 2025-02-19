@@ -1,6 +1,6 @@
 {
   "name": "screwdriver-workflow-parser",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "description": "Parses and converts pipeline configuration into a workflow",
   "main": "index.js",
   "scripts": {
@@ -35,8 +35,8 @@
   ],
   "devDependencies": {
     "chai": "^4.3.7",
-    "eslint": "^8.27.0",
-    "eslint-config-screwdriver": "^7.0.0",
+    "eslint": "^8.57.0",
+    "eslint-config-screwdriver": "^8.0.0",
     "mocha": "^10.1.0",
     "mocha-multi-reporters": "^1.5.1",
     "mocha-sonarqube-reporter": "^1.0.2",
@@ -45,8 +45,8 @@
     "sinon": "^14.0.2"
   },
   "dependencies": {
-    "@hapi/hoek": "^10.0.1",
-    "screwdriver-data-schema": "^24.0.0"
+    "@hapi/hoek": "^11.0.7",
+    "screwdriver-data-schema": "^25.0.0"
   },
   "release": {
     "branches": [
