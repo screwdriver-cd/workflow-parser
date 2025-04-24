@@ -164,6 +164,28 @@ describe('getWorkflow', () => {
         });
     });
 
+    it('should handle ~pr-closed trigger', async () => {
+        const result = await getWorkflow(
+            {
+                jobs: {
+                    foo: { requires: ['~pr-closed'] },
+                    bar: { requires: ['foo'] }
+                }
+            },
+            triggerFactoryMock
+        );
+
+        console.log(result);
+
+        assert.deepEqual(result, {
+            nodes: [{ name: '~pr' }, { name: '~commit' }, { name: 'foo' }, { name: '~pr-closed' }, { name: 'bar' }],
+            edges: [
+                { src: '~pr-closed', dest: 'foo' },
+                { src: 'foo', dest: 'bar', join: true }
+            ]
+        });
+    });
+
     it('should handle joins', async () => {
         const result = await getWorkflow(
             {

@@ -5,6 +5,7 @@
         "bar": { "requires": ["~foo", "~promote"] },
         "promote": { "requires": [] },
         "baz": { "requires": ["~release", "~tag"] },
+        "closed": { "requires": ["~pr-closed"] },
 
         "stage@integration:setup": { "requires": ["~baz"], "stage": { "name": "integration" } },
         "ci-deploy": { "requires": ["~stage@integration:setup"], "stage": { "name": "integration" } },

@@ -69,6 +69,14 @@ describe('getNextJobs', () => {
             }),
             ['PR-123:main']
         );
+        // trigger for a pr-closed event
+        assert.deepEqual(
+            getNextJobs(WORKFLOW, {
+                trigger: '~pr-closed'
+            }),
+            ['closed']
+        );
+
         // trigger for commit event
         assert.deepEqual(getNextJobs(WORKFLOW, { trigger: '~commit' }), ['main']);
         // trigger for release event
