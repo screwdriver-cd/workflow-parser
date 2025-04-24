@@ -9,6 +9,9 @@
         { "name": "baz" },
         { "name": "~release" },
         { "name": "~tag" },
+        { "name": "closed" },
+        { "name": "~pr-closed" },
+    
 
         { "name": "stage@integration:setup", "stageName":  "integration"},
         { "name": "ci-deploy", "stageName":  "integration"},
@@ -31,6 +34,7 @@
         { "src": "promote", "dest": "bar" },
         { "src": "~release", "dest": "baz" },
         { "src": "~tag", "dest": "baz" },
+        { "src": "~pr-closed", "dest": "closed" },
 
         { "src": "baz", "dest": "stage@integration:setup" },
         { "src": "stage@integration:setup", "dest": "ci-deploy" },
