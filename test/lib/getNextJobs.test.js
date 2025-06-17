@@ -6,6 +6,7 @@ const WORKFLOW = require('../data/expected-output.json');
 const EXTERNAL_WORKFLOW = require('../data/expected-external.json');
 const EXTERNAL_COMPLEX_WORKFLOW = require('../data/expected-external-complex.json');
 const EXTERNAL_JOIN_WORKFLOW = require('../data/expected-external-join.json');
+const PR_STAGE_ROWKFLOW = require('../data/pr-stage-workflow.json');
 
 describe('getNextJobs', () => {
     it('should throw if trigger not provided', () => {
@@ -29,6 +30,13 @@ describe('getNextJobs', () => {
             }),
             ['ci-test']
         );
+        assert.deepEqual(
+            getNextJobs(WORKFLOW, {
+                trigger: 'PR-1:stage@integration:setup',
+                startFrom: 'PR-1:ci-test'
+            }),
+            ['PR-1:ci-test']
+        );
         // trigger for a stage setup with the startFrom as a stage
         assert.deepEqual(
             getNextJobs(WORKFLOW, {
@@ -36,6 +44,13 @@ describe('getNextJobs', () => {
                 startFrom: 'stage@integration'
             }),
             ['ci-deploy']
+        );
+        assert.deepEqual(
+            getNextJobs(WORKFLOW, {
+                trigger: 'PR-1:stage@integration:setup',
+                startFrom: 'PR-1:stage@integration'
+            }),
+            ['PR-1:ci-deploy']
         );
         // trigger for a stage setup with the startFrom as the stage setup of same stage
         assert.deepEqual(
@@ -45,6 +60,13 @@ describe('getNextJobs', () => {
             }),
             ['ci-deploy']
         );
+        assert.deepEqual(
+            getNextJobs(WORKFLOW, {
+                trigger: 'PR-1:stage@integration:setup',
+                startFrom: 'PR-1:stage@integration:setup'
+            }),
+            ['PR-1:ci-deploy']
+        );
         // trigger for a stage setup with the startFrom as the stage job in a different stage
         assert.deepEqual(
             getNextJobs(WORKFLOW, {
@@ -53,6 +75,13 @@ describe('getNextJobs', () => {
             }),
             ['ci-deploy']
         );
+        assert.deepEqual(
+            getNextJobs(WORKFLOW, {
+                trigger: 'PR-1:stage@integration:setup',
+                startFrom: 'PR-1:a-test'
+            }),
+            ['PR-1:ci-deploy']
+        );
         // trigger for a stage setup with the startFrom as the stage setup of a different stage
         assert.deepEqual(
             getNextJobs(WORKFLOW, {
@@ -60,6 +89,13 @@ describe('getNextJobs', () => {
                 startFrom: 'stage@alpha:setup'
             }),
             ['ci-deploy']
+        );
+        assert.deepEqual(
+            getNextJobs(WORKFLOW, {
+                trigger: 'PR-1:stage@integration:setup',
+                startFrom: 'PR-1:stage@alpha:setup'
+            }),
+            ['PR-1:ci-deploy']
         );
         // trigger for a pr event
         assert.deepEqual(
@@ -123,6 +159,71 @@ describe('getNextJobs', () => {
                 chainPR: true
             }),
             []
+        );
+    });
+
+    it('should figure out what PR stage jobs start next', () => {
+        assert.deepEqual(
+            getNextJobs(PR_STAGE_ROWKFLOW, {
+                trigger: '~pr',
+                prNum: 123
+            }),
+            ['PR-123:hub', 'PR-123:stage@simple:setup']
+        );
+        assert.deepEqual(
+            getNextJobs(PR_STAGE_ROWKFLOW, {
+                trigger: 'PR-123:stage@simple:setup'
+            }),
+            ['PR-123:a', 'PR-123:b']
+        );
+        assert.deepEqual(
+            getNextJobs(PR_STAGE_ROWKFLOW, {
+                trigger: 'PR-123:a'
+            }),
+            []
+        );
+        assert.deepEqual(
+            getNextJobs(PR_STAGE_ROWKFLOW, {
+                trigger: 'PR-123:b'
+            }),
+            []
+        );
+        // ChainPR enabled
+        assert.deepEqual(
+            getNextJobs(PR_STAGE_ROWKFLOW, {
+                trigger: '~pr',
+                chainPR: true,
+                prNum: 123
+            }),
+            ['PR-123:hub', 'PR-123:stage@simple:setup']
+        );
+        assert.deepEqual(
+            getNextJobs(PR_STAGE_ROWKFLOW, {
+                trigger: 'PR-123:stage@simple:setup',
+                chainPR: true
+            }),
+            ['PR-123:a', 'PR-123:b', 'PR-123:e']
+        );
+        assert.deepEqual(
+            getNextJobs(PR_STAGE_ROWKFLOW, {
+                trigger: 'PR-123:a',
+                chainPR: true
+            }),
+            ['PR-123:c']
+        );
+        assert.deepEqual(
+            getNextJobs(PR_STAGE_ROWKFLOW, {
+                trigger: 'PR-123:b',
+                chainPR: true
+            }),
+            ['PR-123:stage@simple:teardown']
+        );
+        assert.deepEqual(
+            getNextJobs(PR_STAGE_ROWKFLOW, {
+                trigger: 'PR-123:stage@simple:teardown',
+                chainPR: true
+            }),
+            ['PR-123:target']
         );
     });
 
