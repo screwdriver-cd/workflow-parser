@@ -1,0 +1,96 @@
+{
+    "nodes": [
+        {
+            "name": "~pr"
+        },
+        {
+            "name": "~commit"
+        },
+        {
+            "name": "a",
+            "stageName": "simple"
+        },
+        {
+            "name": "b",
+            "stageName": "simple"
+        },
+        {
+            "name": "c",
+            "stageName": "simple"
+        },
+        {
+            "name": "d"
+        },
+        {
+            "name": "e"
+        },
+        {
+            "name": "hub"
+        },
+        {
+            "name": "stage@simple:setup",
+            "stageName": "simple"
+        },
+        {
+            "name": "stage@simple:teardown",
+            "stageName": "simple"
+        },
+        {
+            "name": "target"
+        }
+    ],
+    "edges": [
+        {
+            "src": "~commit",
+            "dest": "hub"
+        },
+        {
+            "src": "~commit",
+            "dest": "stage@simple:setup"
+        },
+        {
+            "src": "~pr",
+            "dest": "hub"
+        },
+        {
+            "src": "~pr",
+            "dest": "stage@simple:setup"
+        },
+        {
+            "src": "a",
+            "dest": "c",
+            "join": true
+        },
+        {
+            "src": "b",
+            "dest": "stage@simple:teardown",
+            "join": true
+        },
+        {
+            "src": "c",
+            "dest": "stage@simple:teardown",
+            "join": true
+        },
+        {
+            "src": "hub",
+            "dest": "d",
+            "join": true
+        },
+        {
+            "src": "stage@simple:setup",
+            "dest": "a"
+        },
+        {
+            "src": "stage@simple:setup",
+            "dest": "b"
+        },
+        {
+            "src": "stage@simple:setup",
+            "dest": "e"
+        },
+        {
+            "src": "stage@simple:teardown",
+            "dest": "target"
+        }
+    ]
+}
