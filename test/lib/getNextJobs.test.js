@@ -6,7 +6,7 @@ const WORKFLOW = require('../data/expected-output.json');
 const EXTERNAL_WORKFLOW = require('../data/expected-external.json');
 const EXTERNAL_COMPLEX_WORKFLOW = require('../data/expected-external-complex.json');
 const EXTERNAL_JOIN_WORKFLOW = require('../data/expected-external-join.json');
-const PR_STAGE_ROWKFLOW = require('../data/pr-stage-workflow.json');
+const PR_STAGE_WORKFLOW = require('../data/pr-stage-workflow.json');
 
 describe('getNextJobs', () => {
     it('should throw if trigger not provided', () => {
@@ -164,33 +164,33 @@ describe('getNextJobs', () => {
 
     it('should figure out what PR stage jobs start next', () => {
         assert.deepEqual(
-            getNextJobs(PR_STAGE_ROWKFLOW, {
+            getNextJobs(PR_STAGE_WORKFLOW, {
                 trigger: '~pr',
                 prNum: 123
             }),
             ['PR-123:hub', 'PR-123:stage@simple:setup']
         );
         assert.deepEqual(
-            getNextJobs(PR_STAGE_ROWKFLOW, {
+            getNextJobs(PR_STAGE_WORKFLOW, {
                 trigger: 'PR-123:stage@simple:setup'
             }),
             ['PR-123:a', 'PR-123:b']
         );
         assert.deepEqual(
-            getNextJobs(PR_STAGE_ROWKFLOW, {
+            getNextJobs(PR_STAGE_WORKFLOW, {
                 trigger: 'PR-123:a'
             }),
             []
         );
         assert.deepEqual(
-            getNextJobs(PR_STAGE_ROWKFLOW, {
+            getNextJobs(PR_STAGE_WORKFLOW, {
                 trigger: 'PR-123:b'
             }),
             []
         );
         // ChainPR enabled
         assert.deepEqual(
-            getNextJobs(PR_STAGE_ROWKFLOW, {
+            getNextJobs(PR_STAGE_WORKFLOW, {
                 trigger: '~pr',
                 chainPR: true,
                 prNum: 123
@@ -198,28 +198,28 @@ describe('getNextJobs', () => {
             ['PR-123:hub', 'PR-123:stage@simple:setup']
         );
         assert.deepEqual(
-            getNextJobs(PR_STAGE_ROWKFLOW, {
+            getNextJobs(PR_STAGE_WORKFLOW, {
                 trigger: 'PR-123:stage@simple:setup',
                 chainPR: true
             }),
             ['PR-123:a', 'PR-123:b', 'PR-123:e']
         );
         assert.deepEqual(
-            getNextJobs(PR_STAGE_ROWKFLOW, {
+            getNextJobs(PR_STAGE_WORKFLOW, {
                 trigger: 'PR-123:a',
                 chainPR: true
             }),
             ['PR-123:c']
         );
         assert.deepEqual(
-            getNextJobs(PR_STAGE_ROWKFLOW, {
+            getNextJobs(PR_STAGE_WORKFLOW, {
                 trigger: 'PR-123:b',
                 chainPR: true
             }),
             ['PR-123:stage@simple:teardown']
         );
         assert.deepEqual(
-            getNextJobs(PR_STAGE_ROWKFLOW, {
+            getNextJobs(PR_STAGE_WORKFLOW, {
                 trigger: 'PR-123:stage@simple:teardown',
                 chainPR: true
             }),
